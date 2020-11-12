@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+# Scons
+*.pyc
+/__pycache__
