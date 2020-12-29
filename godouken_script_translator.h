@@ -3,6 +3,9 @@
 #include "godouken_data_types.h"
 
 #include "core/object.h"
+#include "core/script_language.h"
+
+#include "modules/gdscript/gdscript.h"
 
 #ifndef GODOUKEN_SCRIPT_TRANSLATOR_H
 #define GODOUKEN_SCRIPT_TRANSLATOR_H
