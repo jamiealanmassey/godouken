@@ -7,6 +7,8 @@
 
 struct GodoukenDataMetaRoadmap
 {
+	GodoukenDataMetaRoadmap() {}
+
 	GodoukenDataMetaRoadmap(
 			const String &p_roadmap_version,
 			const String &p_roadmap_desc) :
@@ -22,6 +24,8 @@ struct GodoukenDataMetaRoadmap
 
 struct GodoukenDataMetaLink 
 {
+	GodoukenDataMetaLink() {}
+
 	GodoukenDataMetaLink(
 			const String &p_link_label,
 			const String &p_link_address) :
@@ -37,6 +41,8 @@ struct GodoukenDataMetaLink
 
 struct GodoukenDataMetaTodo
 {
+	GodoukenDataMetaTodo() {}
+
 	GodoukenDataMetaTodo(
 			const String &p_todo_owner,
 			const String &p_todo_desc,
@@ -55,6 +61,8 @@ struct GodoukenDataMetaTodo
 
 struct GodoukenDataNodeMeta
 {
+	GodoukenDataNodeMeta() {}
+
 	GodoukenDataNodeMeta(
 			const float p_meta_deprecated,
 			const float p_meta_version,
@@ -79,6 +87,8 @@ struct GodoukenDataNodeMeta
 
 struct GodoukenDataType 
 {
+	GodoukenDataType() {}
+
 	GodoukenDataType(
 			const bool p_type_is_godot,
 			const String &p_type_name) :
@@ -95,6 +105,8 @@ struct GodoukenDataType
 
 struct GodoukenDataParameter
 {
+	GodoukenDataParameter() {}
+
 	GodoukenDataParameter(
 			const String &p_param_identifier,
 			const String &p_param_desc,
@@ -113,6 +125,8 @@ struct GodoukenDataParameter
 
 struct GodoukenDataNodeSimple
 {
+	GodoukenDataNodeSimple() {}
+
 	GodoukenDataNodeSimple(
 			const String &p_node_name,
 			const String &p_node_desc_brief,
@@ -129,6 +143,8 @@ struct GodoukenDataNodeSimple
 
 struct GodoukenDataNodeSignal : GodoukenDataNodeSimple
 {
+	GodoukenDataNodeSignal() {}
+
 	GodoukenDataNodeSignal(
 			const Vector<GodoukenDataParameter> p_signal_params,
 			const GodoukenDataNodeSimple &p_node_data_simple) :
@@ -143,6 +159,8 @@ struct GodoukenDataNodeSignal : GodoukenDataNodeSimple
 
 struct GodoukenDataNodeBase : GodoukenDataNodeSimple
 {
+	GodoukenDataNodeBase() {}
+
 	GodoukenDataNodeBase(
 			const String &p_node_extra_warning,
 			const String &p_node_extra_info,
@@ -178,6 +196,8 @@ struct GodoukenDataNodeBase : GodoukenDataNodeSimple
 
 struct GodoukenDataNodeScript : GodoukenDataNodeBase
 {
+	GodoukenDataNodeScript() {}
+
 	GodoukenDataNodeScript(
 			const String &p_script_timestamp_created,
 			const String &p_script_timestamp_updated,
@@ -205,10 +225,13 @@ struct GodoukenDataNodeScript : GodoukenDataNodeBase
 
 struct GodoukenDataNodeMethod : GodoukenDataNodeBase
 {
+	GodoukenDataNodeMethod() {}
+
 	GodoukenDataNodeMethod(
 			const bool p_method_is_godot,
 			const bool p_method_is_internal,
 			const bool p_method_is_overrider,
+			const String &p_method_return_msg,
 			const Vector<String> p_method_see_also,
 			const Vector<GodoukenDataParameter> p_method_params,
 			const Vector<GodoukenDataMetaLink> p_method_links,
@@ -221,6 +244,7 @@ struct GodoukenDataNodeMethod : GodoukenDataNodeBase
 			method_is_godot(p_method_is_godot),
 			method_is_internal(p_method_is_internal),
 			method_is_overrider(p_method_is_overrider),
+			method_return_msg(p_method_return_msg),
 			method_see_also(p_method_see_also),
 			method_links(p_method_links),
 			method_todos(p_method_todos),
@@ -231,6 +255,7 @@ struct GodoukenDataNodeMethod : GodoukenDataNodeBase
     bool method_is_godot;
     bool method_is_internal;
     bool method_is_overrider;
+	String method_return_msg;
     Vector<String> method_see_also;
     Vector<GodoukenDataParameter> method_params;
     Vector<GodoukenDataMetaLink> method_links;
@@ -240,6 +265,8 @@ struct GodoukenDataNodeMethod : GodoukenDataNodeBase
 
 struct GodoukenDataNodeProperty : GodoukenDataNodeBase
 {
+	GodoukenDataNodeProperty() {}
+
 	GodoukenDataNodeProperty(
 			const bool p_property_is_exported,
 			const GodoukenDataNodeBase &p_node_data_base,
