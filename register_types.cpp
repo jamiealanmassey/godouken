@@ -14,6 +14,10 @@ void register_godouken_types() {
 	ClassDB::register_class<GodoukenDataModel>();
 	ClassDB::register_class<GodoukenScriptTranslator>();
 	ClassDB::register_class<GodoukenTest>();
+
+	GodoukenTest *godouken_test = memnew(GodoukenTest);
+	godouken_test->execute_tests();
+	memdelete(godouken_test);
 }
 
 void unregister_godouken_types() {

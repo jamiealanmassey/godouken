@@ -12,6 +12,9 @@ protected:
 	static void _bind_methods();
 
 public:
+	int32_t execute_tests();
+
+public:
 	GodoukenTest();
 	~GodoukenTest();
 };
