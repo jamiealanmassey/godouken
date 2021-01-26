@@ -9,7 +9,7 @@
 #ifndef GODOUKEN_DATA_MODEL_H
 #define GODOUKEN_DATA_MODEL_H
 
-typedef Map<String, GodoukenDataNodeBase*> GodoukenIndexer;
+typedef Map<String, GodoukenData *> GodoukenIndexer;
 
 class GodoukenDataModel : public Object {
     GDCLASS(GodoukenDataModel, Object);
@@ -20,8 +20,8 @@ protected:
     GodoukenIndexer model_node_indices;
 
 public:
-    void node_index_refresh(GodoukenDataNodeBase *p_node);
-    void node_index_insert(GodoukenDataNodeBase *p_node);
+    void node_index_refresh(GodoukenData *p_node);
+    void node_index_insert(GodoukenData *p_node);
 
     void script_parse(const String &p_script_file);
 

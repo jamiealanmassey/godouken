@@ -31,22 +31,41 @@ public:
 	~GodoukenScriptTranslatorMemberData();
 };
 
+class GodoukenScriptTranslatorCommentData : public Object {
+    GDCLASS(GodoukenScriptTranslatorCommentData, Object);
+
+public:
+    String comment_body;
+    String comment_selector;
+
+public:
+    GodoukenScriptTranslatorCommentData();
+    GodoukenScriptTranslatorCommentData(const GodoukenScriptTranslatorCommentData &p_comment_data);
+    GodoukenScriptTranslatorCommentData(const String &p_comment_body, const String &p_comment_selector);
+};
+
+typedef Vector<GodoukenScriptTranslatorCommentData *> CommentDataSet;
+typedef Map<String, CommentDataSet> CommentDataStore;
+
+static const CommentDataSet &CommentDataSet_0 = CommentDataSet();
+static const CommentDataStore &CommentDataStore_0 = CommentDataStore();
+
 class GodoukenScriptTranslatorCommentParser : public Object {
     GDCLASS(GodoukenScriptTranslatorCommentParser, Object);
 
 protected:
-	Dictionary comment_entries;
+    CommentDataStore comment_entries;
 
 public:
 	void parse(const List<String> &p_lines, const int32_t &p_from, const int32_t &p_to);
 	void parse(const List<String> &p_lines);
 	void flush();
 
-	const Dictionary &get_comment_entires() const;
-	const bool has_parsed_entry(const String &p_key) const;
-	const String &get_parsed_entry(const String &p_key, const bool p_remove_element = false);
-
-
+	const CommentDataStore &get_data_store() const;
+    const CommentDataSet &get_data_set(const String &p_key) const;
+	const bool has_data_set(const String &p_key) const;
+	const GodoukenScriptTranslatorCommentData *get_data_set_first(const String &p_key/*, const bool p_remove_element = false*/);
+    
 public:
 	GodoukenScriptTranslatorCommentParser();
 	~GodoukenScriptTranslatorCommentParser();
@@ -56,7 +75,7 @@ class GodoukenScriptTranslator : public Object {
     GDCLASS(GodoukenScriptTranslator, Object);
 
 protected:
-    GDScript* translator_script;
+    GDScript *translator_script;
     int32_t translator_script_line_begin;
     int32_t translator_script_line_end;
 
@@ -70,6 +89,10 @@ protected:
     Map<String, GodoukenDataNodeMethod> script_data_methods;
     Map<String, GodoukenDataNodeSignal> script_data_signals;
 
+	Map<String, PropertyInfo> script_property_infos;
+	Map<String, MethodInfo> script_method_infos;
+	Map<String, MethodInfo> script_signal_infos;
+
 	Dictionary script_members_to_line;
 
 private:
@@ -82,7 +105,11 @@ private:
 protected:
     const GodoukenDataNodeMeta get_meta_data() const;
 
-	void evaluate_member(const String &p_member_name);
+	void evaluate(const String &p_member_name);
+
+	void evaluate_property(const String &p_member_name, GodoukenScriptTranslatorCommentParser *p_comment_parser);
+	void evaluate_method(const String &p_member_name, GodoukenScriptTranslatorCommentParser *p_comment_parser);
+	void evaluate_signal(const String &p_member_name, GodoukenScriptTranslatorCommentParser *p_comment_parser);
 
 public:
     class GodoukenDataModel *script_translate(const String &p_script_name, const String &p_script_directory);

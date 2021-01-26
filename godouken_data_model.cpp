@@ -2,8 +2,8 @@
 
 #include "godouken_data_model.h"
 
-void GodoukenDataModel::node_index_refresh(GodoukenDataNodeBase *p_node) {}
-void GodoukenDataModel::node_index_insert(GodoukenDataNodeBase *p_node) {}
+void GodoukenDataModel::node_index_refresh(GodoukenData *p_node) {}
+void GodoukenDataModel::node_index_insert(GodoukenData *p_node) {}
 
 void GodoukenDataModel::script_parse(const String &p_script_file) {}
 
