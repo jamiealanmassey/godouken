@@ -4,4 +4,4 @@ Import('env')
 Import('env_modules')
 
 env_godouken = env_modules.Clone()
-env_godouken.add_source_files(env.modules_sources, "*.cpp") # Add cpp files to build
+env_godouken.add_source_files(env.modules_sources, "*.cpp")
