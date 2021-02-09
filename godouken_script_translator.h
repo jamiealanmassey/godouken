@@ -120,4 +120,41 @@ public:
 };
 
 
+#include "third_party/json.hpp"
+
+class GodoukenTranslatorV2 : public Object {
+	GDCLASS(GodoukenTranslatorV2, Object);
+
+protected:
+	GDScript *script;
+	int32_t script_line_begin;
+	int32_t script_line_finish;
+
+	List<String> script_lines;
+	List<String> script_keys;
+	List<String> script_reserved_godot_methods;
+	List<String> script_reserved_godot_types;
+
+	Dictionary script_members_to_line;
+
+private:
+	const Dictionary get_members_to_line(const Ref<Script> &p_script);
+	const Array &get_sorted_keys(Array &p_keys);
+
+	const List<String> get_script_lines(const FileAccess *p_script_file);
+	const int32_t get_script_line_begin(const List<String> &p_script_lines);
+
+protected:
+	void evaluate_member(const String &p_member_name);
+
+public:
+	nlohmann::json &evaluate_property(const PropertyInfo &p_property_info);
+	nlohmann::json &evaluate(const String &p_script_name, const String &p_script_directory);
+
+public:
+	GodoukenTranslatorV2();
+	~GodoukenTranslatorV2();
+};
+
+
 #endif // GODOUKEN_SCRIPT_TRANSLATOR_H

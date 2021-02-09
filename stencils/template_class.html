@@ -1,0 +1,246 @@
+<html>
+	<head>
+        <title>{{ data.script.name }} /// {{ data.project_title }}</title>
+        <link rel="stylesheet" href="./../css/bootstrap.min.js">
+        <link rel="stylesheet" href="./../css/style_shared.css">
+        <link rel="stylesheet" href="./../css/style_class.css">
+	</head>
+	<body>
+        <main>
+            <section>
+                <nav>
+                    <iframe src="./../shared/class_navigation.html"></iframe>
+                </nav>
+                <article>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            {% for crumb in data.script.breadcrumbs %}
+                            <li class="breadcrumb-item"><a href="#">{{ crumb }}</a></li>
+                            {% endfor %}
+                        </ol>
+                    </nav>
+                    <div id="content-script-tree">
+                        <div class="alert alert-secondary" role="alert">
+                            <strong>Script Inheritance Tree</strong>
+                        </div>
+                    </div>
+                    <div id="content-script-title">
+                        <div class="row">
+                            <h2 class="my-1"><strong>{{ data.script.name }}</strong></h2>
+                        </div>
+                        <div class="row">
+                            {% if data.script.meta.deprecated %}
+                            <div class="mx-2 text-white">
+                                <span class="widget bg-red rounded-left mx-1">deprecated</span>
+                                <span class="widget bg-dark rounded-right mx-1">{{ data.script.meta.deprecated }}</span>
+                            </div>
+                            {% endif %}
+                            {% if data.script.meta.version %}
+                            <div class="mx-2 text-white">
+                                <span class="widget bg-yellow rounded-left mx-1">version</span>
+                                <span class="widget bg-dark rounded-right mx-1">{{ data.script.meta.version }}</span>
+                            </div>
+                            {% endif %}
+                            {% if data.script.meta.created %}
+                            <div class="mx-2 text-white">
+                                <span class="widget bg-green rounded-left mx-1">created</span>
+                                <span class="widget bg-dark rounded-right mx-1">{{ data.script.meta.created }}</span>
+                            </div>
+                            {% endif %}
+                            {% if data.script.meta.modified %}
+                            <div class="mx-2 text-white">
+                                <span class="widget bg-green rounded-left mx-1">last modified</span>
+                                <span class="widget bg-dark rounded-right mx-1">{{ data.script.meta.modified }}</span>
+                            </div>
+                            {% endif %}
+                            {% if data.script.meta.collection %}
+                            <div class="mx-2 text-white">
+                                <span class="widget bg-green rounded-left mx-1">collection</span>
+                                <span class="widget bg-dark rounded-right mx-1">{{ data.script.meta.collection }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="row">
+                            <div class="row mt-4">
+                                <h3>Brief Description</h3>
+                            </div>
+                            <div class="row border-left border-3 px-2 mt-2">
+                                <i>{{ data.script.description.brief }}</i>
+                            </div>
+                            <div class="row mt-4">
+                                <h3>Detailed Description</h3>
+                            </div>
+                            <div class="row border-left border-3 px-2 mt-2">
+                                <i>{{ data.script.description.detailed }}</i>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="content-script-minimal" class="mt-4">
+                        <div class="row">
+                            <h5>Script Properties</h5>
+                            <table class="table mt-3">
+                                <thead>
+                                    <tr>
+                                        <td><strong>Property Type</strong></td>
+                                        <td><strong>Property Name</strong></td>
+                                        <td><strong>Property Tags</strong></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for property in data.script.properties %}
+                                    <tr>
+                                        <td>{% if property.type_info.href %}<a href="{{ property.type_info.href }}" target="_blank">{{ property.type_info.name }}</a>{% else %}{{ property.type_info.name }}{% endif %}</td>
+                                        <td><a href="#{{ property.name }}">{{ property.name }}</a></td>
+                                        {% if property.tags %}
+                                        <td>
+                                            {% if property.tags.is_godot %}
+                                            <div class="text-white">
+                                                <span class="widget bg-blue rounded mx-1 px-2">godot type</span>
+                                            </div>
+                                            {% endif %}
+                                            {% if property.tags.is_exported %}
+                                            <div class="text-white">
+                                                <span class="widget bg-green rounded mx-1 px-2">exports // {{ property.type_info.name }}</span>
+                                            </div>
+                                            {% endif %}
+                                        </td>
+                                        {% endif %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--<div class="row">
+                            <h5>Script Methods</h5>
+                            <table class="table mt-3">
+                                <thead>
+                                    <td><strong>Method Return Type</strong></td>
+                                    <td><strong>Method Definition</strong></td>
+                                    <td><strong>Method Tags</strong></td>
+                                </thead>
+                                <tbody>
+                                    {% for method in data.script.methods %}
+                                    <tr>
+                                        <td>{% if method.type_info.href %}<a href="{{ method.type_info.href }}">{{ method.type_info.name }}</a>{% else %}{{ method.type_info.name }}{% endif %}</td>
+                                        <td><a href="#{{ method.name }}">{{ method.name }}</a> 
+                                            ( {% for parameter in method.parameters %}
+                                                {% if parameter.type_info.href %}
+                                                <a href="#{{ parameter.type_info.href }}">{{ parameter.type_info.name }}</a>
+                                                {% else %}
+                                                {{ parameter.type_info.name }}
+                                                {% endif %}
+                                                {{ parameter.name }}{% if !loop.is_last %}, {% endif %}
+                                              {% endfor %} )
+                                        </td>
+                                        {% if method.tags %}
+                                        <td>
+                                            {% if method.tags.is_godot %}
+                                            <div class="text-white">
+                                                <span class="widget bg-blue rounded mx-1 px-2">godot type</span>
+                                            </div>
+                                            {% endif %}
+                                            {% if method.tags.is_internal %}
+                                            <div class="text-white">
+                                                <span class="widget bg-green rounded mx-1 px-2">internal / private</span>
+                                            </div>
+                                            {% endif %}
+                                            {% if method.tags.is_overrider %}
+                                            <div class="text-white">
+                                                <span class="widget bg-orange rounded mx-1 px-2">overrider // {{ method.tags.cl_overrider }}</span>
+                                            </div>
+                                            {% endif %}
+                                        </td>
+                                        {% endif %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>-->
+                        <!--<div class="row">
+                            <h5>Script Signals</h5>
+                            <table class="table mt-3">
+                                <thead>
+                                    <tr>
+                                        <td><strong>Signal Name</strong></td>
+                                        <td><strong>Signal Description</strong></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for signal in data.script.signals %}
+                                    <tr>
+                                        <td>
+                                            <span class="mr-2">
+                                                <a href="#{{ signal.name }}">{{ signal.name }}</a> 
+                                                ( {% for parameter in signal.parameters %}
+                                                {% if parameter.type_info.href %}
+                                                <a href="#{{ parameter.type_info.href }}">{{ parameter.type_info.name }}</a>
+                                                {% else %}
+                                                {{ parameter.type_info.name }}
+                                                {% endif %}
+                                                {{ parameter.name }}{% if !loop.is_last %}, {% endif %}
+                                                {% endfor %} )
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>-->
+                    </div>
+                    <div id="content-script-detailed" class="mt-4">
+                        <div class="row">
+                            <h3>Property Descriptions</h3>
+                            <div class="method-descriptor border-left border-green mt-3">
+                                {% for property in data.script.properties %}
+                                <div class="border-left border-blue">
+                                    <div class="row mx-2 mt-2">
+                                        <span><i><strong>Property Signature</strong></i></span>
+                                        <div>
+                                            <h6 class="my-0">
+                                                {% if property.type_info.href %}
+                                                <a href="{{ property.type_info.href }}" target="_blank">{{ property.type_info.name }}</a>
+                                                {% else %}
+                                                {{ property.type_info.name }}
+                                                {% endif %}
+                                                {{ property.name }}
+                                            </h6>
+                                            {% if property.description.detailed %}
+                                            <p>{{ property.description.detailed }}</p>
+                                            {% endif %}
+                                            <p></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <!--<div class="row">
+                            <h3>Method Descriptions</h3>
+                            <div class="method-descriptor border-left border-green mt-3">
+                                {% for method in data.script.methods %}
+                                <div class="border-left border-blue">
+                                    <div class="row mx-2 mt-2">
+                                        <span><i><strong>Method Signature</strong></i></span>
+                                        <div>
+                                            <h6 class="my-0">
+                                                {% if method.type_info.href %}
+                                                <a href="{{ method.type_info.href }}" target="_blank">{{ method.type_info.name }}</a>
+                                                {% else %}
+                                                {{ method.type_info.name }}
+                                                {% endif %} 
+                                                {% method.name %}
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>-->
+                    </div>
+                </article>
+            </section>
+        </main>
+        <script src="./../js/jquery.min.js"></script>
+        <script src="./../js/bootstrap.min.js"></script>
+    </body>
+</html>

@@ -9,6 +9,8 @@
 #include "godouken_script_translator.h"
 #include "godouken_tests/godouken_test.h"
 
+GodoukenScriptTranslator *godouken_script_translator = nullptr;
+
 void register_godouken_types() {
 	ClassDB::register_class<Godouken>();
 	ClassDB::register_class<GodoukenDataModel>();
@@ -18,6 +20,8 @@ void register_godouken_types() {
 	GodoukenTest *godouken_test = memnew(GodoukenTest);
 	godouken_test->execute_tests();
 	memdelete(godouken_test);
+
+	godouken_script_translator = memnew(GodoukenScriptTranslator);
 }
 
 void unregister_godouken_types() {
