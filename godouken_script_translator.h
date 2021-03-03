@@ -1,5 +1,8 @@
 /* godouken_script_translator.h */
 
+#ifndef GODOUKEN_SCRIPT_TRANSLATOR_H
+#define GODOUKEN_SCRIPT_TRANSLATOR_H
+
 #include "godouken_data_types.h"
 
 #include "core/script_language.h"
@@ -16,19 +19,38 @@
 
 #include "modules/gdscript/gdscript.h"
 
-#ifndef GODOUKEN_SCRIPT_TRANSLATOR_H
-#define GODOUKEN_SCRIPT_TRANSLATOR_H
-
 class GodoukenScriptTranslatorMemberData : public Object {
 	GDCLASS(GodoukenScriptTranslatorMemberData, Object);
 
 public:
 	uint8_t member_type;
-	uint32_t member_line; 
+	uint32_t member_line;
 
 public:
 	GodoukenScriptTranslatorMemberData();
 	~GodoukenScriptTranslatorMemberData();
+};
+
+class GodoukenScriptTranslatorPropertyData : public GodoukenScriptTranslatorMemberData {
+	GDCLASS(GodoukenScriptTranslatorPropertyData, GodoukenScriptTranslatorMemberData);
+
+public:
+	PropertyInfo member_property_info;
+
+public:
+	GodoukenScriptTranslatorPropertyData();
+	~GodoukenScriptTranslatorPropertyData();
+};
+
+class GodoukenScriptTranslatorMethodData : public GodoukenScriptTranslatorMemberData {
+	GDCLASS(GodoukenScriptTranslatorMethodData, GodoukenScriptTranslatorMemberData);
+
+public:
+	MethodInfo member_method_info;
+
+public:
+	GodoukenScriptTranslatorMethodData();
+	~GodoukenScriptTranslatorMethodData();
 };
 
 class GodoukenScriptTranslatorCommentData : public Object {
@@ -57,8 +79,8 @@ protected:
     CommentDataStore comment_entries;
 
 public:
-	void parse(const List<String> &p_lines, const int32_t &p_from, const int32_t &p_to);
-	void parse(const List<String> &p_lines);
+	void parse(const Vector<String> &p_lines, const int32_t &p_from, const int32_t &p_to);
+	void parse(const Vector<String> &p_lines);
 	void flush();
 
 	const CommentDataStore &get_data_store() const;
@@ -130,7 +152,7 @@ protected:
 	int32_t script_line_begin;
 	int32_t script_line_finish;
 
-	List<String> script_lines;
+	Vector<String> script_lines;
 	List<String> script_keys;
 	List<String> script_reserved_godot_methods;
 	List<String> script_reserved_godot_types;
@@ -142,13 +164,17 @@ private:
 	const Array &get_sorted_keys(Array &p_keys);
 
 	const List<String> get_script_lines(const FileAccess *p_script_file);
-	const int32_t get_script_line_begin(const List<String> &p_script_lines);
+	const int32_t get_script_line_begin(const Vector<String> &p_script_lines);
 
 protected:
 	void evaluate_member(const String &p_member_name);
 
 public:
+	nlohmann::json &evaluate_signal(const MethodInfo &p_signal_info);
+	nlohmann::json &evaluate_method(const MethodInfo &p_method_info);
 	nlohmann::json &evaluate_property(const PropertyInfo &p_property_info);
+	nlohmann::json &evaluate_script(const Array p_members_to_keys);
+	nlohmann::json &evaluate(const String &p_code);
 	nlohmann::json &evaluate(const String &p_script_name, const String &p_script_directory);
 
 public:

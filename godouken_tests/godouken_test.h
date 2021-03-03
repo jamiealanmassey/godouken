@@ -8,11 +8,19 @@
 class GodoukenTest : public Object {
 	GDCLASS(GodoukenTest, Object);
 
+private:
+	static GodoukenTest *singleton;
+
 protected:
 	static void _bind_methods();
 
 public:
 	int32_t execute_tests();
+
+public:
+	class GodoukenTranslatorV2 *script_translator;
+
+	static GodoukenTest *get_singleton();
 
 public:
 	GodoukenTest();
