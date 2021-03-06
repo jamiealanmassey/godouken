@@ -31,7 +31,7 @@ static const String &property_script_1 =
 		"##! @brief : Defines health\n"
 		"##! @detailed : Defines health that can be modified to destroy entity\n"
 		"#\n"
-		"export(int) var health = 100\n"
+		"var health = 100\n"
 		"export(int) var health_max = 100\n"
 		"export(float) var movement_speed = 350\n"
 		"\n"
@@ -42,19 +42,27 @@ static const String &property_script_1 =
 GodoukenTest *GodoukenTest::singleton = nullptr;
 
 TEST(TRANSLATOR_TESTS, TEST_EVALUATION_PROPERTY1) {
-	nlohmann::json &script_result = GodoukenTest::get_singleton()->script_translator->evaluate("property_test_script1.gd", "res://godouken/test/scripts/");
+	nlohmann::json script_result;
+	GodoukenTest::get_singleton()->script_translator->evaluate(script_result, "property_test_script1.gd", "res://godouken/test/scripts/");
 
 	// ASSERT_TRUE(script_result.contains("script"));
 	// ASSERT_TRUE(script_result["script"].contains("properties"));
 	// ASSERT_TRUE(script_result["script"]["properties"].size() > 0);
 
 	ASSERT_EQ(script_result["script"]["properties"][0]["name"], "health");
-	ASSERT_EQ(script_result["script"]["properties"][0]["description"]["brief"], "stores the humanoid health");
-	ASSERT_EQ(script_result["script"]["properties"][0]["description"]["detailed"], "stores the humanoid health");
-	ASSERT_EQ(script_result["script"]["properties"][0]["tags"]["is_godot"], true);
-	ASSERT_EQ(script_result["script"]["properties"][0]["tags"]["is_exported"], true);
-	ASSERT_EQ(script_result["script"]["properties"][0]["type_info"]["name"], "int");
-	ASSERT_EQ(script_result["script"]["properties"][0]["type_info"]["href"], "https://docs.godotengine.org/en/3.2/classes/class_int.html");
+	ASSERT_EQ(script_result["script"]["properties"][0]["description"]["brief"], "Defines health");
+	ASSERT_EQ(script_result["script"]["properties"][0]["description"]["detailed"], "Defines health that can be modified to destroy entity");
+	ASSERT_EQ(script_result["script"]["properties"][0]["tags"]["is_godot"], false);
+	ASSERT_EQ(script_result["script"]["properties"][0]["tags"]["is_exported"], false);
+	//ASSERT_EQ(script_result["script"]["properties"][0]["type_info"]["name"], "");
+	ASSERT_EQ(script_result["script"]["properties"][0]["type_info"]["href"], "");
+
+	ASSERT_EQ(script_result["script"]["properties"][1]["name"], "health_max");
+	ASSERT_EQ(script_result["script"]["properties"][1]["description"]["brief"], "");
+	ASSERT_EQ(script_result["script"]["properties"][1]["description"]["detailed"], "");
+	ASSERT_EQ(script_result["script"]["properties"][1]["tags"]["is_godot"], true);
+	ASSERT_EQ(script_result["script"]["properties"][1]["tags"]["is_exported"], true);
+	ASSERT_EQ(script_result["script"]["properties"][1]["type_info"]["href"], "https://docs.godotengine.org/en/3.2/classes/class_int.html");
 }
 
 TEST(TRANSLATOR_TESTS, TEST_EVALUATION_PROPERTY2) {

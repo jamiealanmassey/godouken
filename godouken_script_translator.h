@@ -153,6 +153,7 @@ protected:
 	int32_t script_line_finish;
 
 	Vector<String> script_lines;
+	Map<Variant::Type, String> script_type_documentation;
 	List<String> script_keys;
 	List<String> script_reserved_godot_methods;
 	List<String> script_reserved_godot_types;
@@ -170,12 +171,12 @@ protected:
 	void evaluate_member(const String &p_member_name);
 
 public:
-	nlohmann::json &evaluate_signal(const MethodInfo &p_signal_info);
-	nlohmann::json &evaluate_method(const MethodInfo &p_method_info);
-	nlohmann::json &evaluate_property(const PropertyInfo &p_property_info);
-	nlohmann::json &evaluate_script(const Array p_members_to_keys);
-	nlohmann::json &evaluate(const String &p_code);
-	nlohmann::json &evaluate(const String &p_script_name, const String &p_script_directory);
+	void evaluate_signal(nlohmann::json &p_script_json, const MethodInfo &p_signal_info);
+	void evaluate_method(nlohmann::json &p_script_json, const MethodInfo &p_method_info);
+	void evaluate_property(nlohmann::json &p_script_json, const PropertyInfo &p_property_info);
+	void evaluate_script(nlohmann::json &p_script_json, const Array p_members_to_keys);
+	void evaluate(nlohmann::json &p_script_json, const String &p_code);
+	void evaluate(nlohmann::json &p_script_json, const String &p_script_name, const String &p_script_directory);
 
 public:
 	GodoukenTranslatorV2();

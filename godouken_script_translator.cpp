@@ -99,10 +99,11 @@ const bool GodoukenScriptTranslatorCommentParser::has_data_set(const String &p_k
 }
 
 const GodoukenScriptTranslatorCommentData *GodoukenScriptTranslatorCommentParser::get_data_set_first(const String &p_key/*, const bool p_remove_element*/) {
-	GodoukenScriptTranslatorCommentData *result = nullptr;
+	GodoukenScriptTranslatorCommentData *result = memnew(GodoukenScriptTranslatorCommentData);
 	if (comment_entries.has(p_key)) {
 		const CommentDataSet &comment_data_set = comment_entries[p_key];
 		if (comment_data_set.size() > 0) {
+			memdelete(result);
 			result = comment_data_set[0];
 		}
 	}
@@ -670,15 +671,15 @@ void GodoukenTranslatorV2::evaluate_member(const String& p_member_name) {
 	}
 }
 
-nlohmann::json &GodoukenTranslatorV2::evaluate_signal(const MethodInfo &p_signal_info) {
-	return nlohmann::json::object();
+void GodoukenTranslatorV2::evaluate_signal(nlohmann::json &p_script_json, const MethodInfo &p_signal_info) {
+	
 }
 
-nlohmann::json &GodoukenTranslatorV2::evaluate_method(const MethodInfo &p_method_info) {
-	return nlohmann::json::object();
+void GodoukenTranslatorV2::evaluate_method(nlohmann::json &p_script_json, const MethodInfo &p_method_info) {
+	
 }
 
-nlohmann::json &GodoukenTranslatorV2::evaluate_property(const PropertyInfo &p_property_info) {
+void GodoukenTranslatorV2::evaluate_property(nlohmann::json &p_script_json, const PropertyInfo &p_property_info) {
 	GodoukenScriptTranslatorCommentParser *comment_parser = memnew(GodoukenScriptTranslatorCommentParser);
 	comment_parser->parse(script_lines, script_line_begin, script_line_finish);
 
@@ -686,15 +687,15 @@ nlohmann::json &GodoukenTranslatorV2::evaluate_property(const PropertyInfo &p_pr
 	property_json["name"] = p_property_info.name.utf8();
 	property_json["description"]["brief"] = comment_parser->get_data_set_first("@brief")->comment_body.utf8();
 	property_json["description"]["detailed"] = comment_parser->get_data_set_first("@detailed")->comment_body.utf8();
-	property_json["type_info"]["name"] = p_property_info.name.utf8();
-	property_json["type_info"]["href"] = ""; // TODO //"https://docs.godotengine.org/en/3.2/classes/class_int.html";
-	property_json["tags"]["is_godot"] = script_reserved_godot_types.find(p_property_info.name) != nullptr;
-	property_json["tags"]["is_exported"] = p_property_info.hint != PropertyHint::PROPERTY_HINT_NONE;
-	return property_json;
+	property_json["type_info"]["name"] = ""; //p_property_info.name.utf8();
+	property_json["type_info"]["href"] = script_type_documentation.has(p_property_info.type) ? script_type_documentation[p_property_info.type].utf8() : "";
+	property_json["tags"]["is_godot"] = (p_property_info.type != Variant::NIL && p_property_info.type != Variant::OBJECT);
+	property_json["tags"]["is_exported"] = (p_property_info.usage & PROPERTY_USAGE_EDITOR) == PROPERTY_USAGE_EDITOR;
+	p_script_json["script"]["properties"].push_back(property_json);
 }
 
-nlohmann::json &GodoukenTranslatorV2::evaluate_script(const Array p_members_to_keys) {
-	nlohmann::json script_json = nlohmann::json::object();
+void GodoukenTranslatorV2::evaluate_script(nlohmann::json &p_script_json, const Array p_members_to_keys) {
+	//nlohmann::json script_json = nlohmann::json::object();
 	for (int32_t i = 0; i < p_members_to_keys.size(); i++) {
 		const String &member_name = p_members_to_keys.get(i);
 		Object *member_data_ptr = script_members_to_line[member_name];
@@ -703,7 +704,8 @@ nlohmann::json &GodoukenTranslatorV2::evaluate_script(const Array p_members_to_k
 			script_line_finish = member_data->member_line;
 			switch (member_data->member_type) {
 				case 0:
-					script_json["properties"].push_back(evaluate_property(((GodoukenScriptTranslatorPropertyData *)member_data)->member_property_info));
+					//script_json["properties"].push_back(evaluate_property(((GodoukenScriptTranslatorPropertyData *)member_data)->member_property_info));
+					evaluate_property(p_script_json, ((GodoukenScriptTranslatorPropertyData *)member_data)->member_property_info);
 					break;
 				case 1:
 					// script_json["script"]["methods"].push_back(evaluate_method(((GodoukenScriptTranslatorMethodData *)member_data)->member_method_info));
@@ -715,13 +717,13 @@ nlohmann::json &GodoukenTranslatorV2::evaluate_script(const Array p_members_to_k
 					break;
 			}
 		}
-	}
 
-	return script_json;
+		script_line_begin = script_line_finish;
+	}
 }
 
-nlohmann::json &GodoukenTranslatorV2::evaluate(const String &p_code) {
-	nlohmann::json script_json = nlohmann::json::object();
+void GodoukenTranslatorV2::evaluate(nlohmann::json &p_script_json, const String &p_code) {
+	//nlohmann::json script_json = nlohmann::json::object();
 	script = memnew(GDScript);
 	script->set_source_code(p_code);
 	script->reload(true);
@@ -777,21 +779,17 @@ nlohmann::json &GodoukenTranslatorV2::evaluate(const String &p_code) {
 		const Array members_to_keys = get_sorted_keys(script_members_to_line.keys());
 		script_lines = p_code.split("\n");
 		script_line_begin = get_script_line_begin(script_lines);
-		script_json["script"] = evaluate_script(members_to_keys);
+		/*script_json["script"] = */evaluate_script(p_script_json, members_to_keys);
 	}
-
-	return script_json;
 }
 
-nlohmann::json& GodoukenTranslatorV2::evaluate(const String& p_script_name, const String& p_script_directory) {
-	nlohmann::json script_translator_data; // = nlohmann::json::object();
+void GodoukenTranslatorV2::evaluate(nlohmann::json &p_script_json, const String& p_script_name, const String& p_script_directory) {
+	//nlohmann::json script_translator_data; // = nlohmann::json::object();
 	Error script_status;
 	FileAccess *script_file = FileAccess::open(p_script_directory + p_script_name, FileAccess::READ, &script_status);
 	if (script_status == Error::OK) {
-		script_translator_data["data"] = evaluate(script_file->get_as_utf8_string());
+		/*script_translator_data["data"] =*/ evaluate(p_script_json, script_file->get_as_utf8_string());
 	}
-
-	return script_translator_data;
 }
 
 GodoukenTranslatorV2::GodoukenTranslatorV2() :
@@ -799,38 +797,38 @@ GodoukenTranslatorV2::GodoukenTranslatorV2() :
 	script_line_begin(-1),
 	script_line_finish(-1) {
 
+	script_type_documentation.insert(Variant::Type::BOOL, "https://docs.godotengine.org/en/3.2/classes/class_bool.html");
+	script_type_documentation.insert(Variant::Type::INT, "https://docs.godotengine.org/en/3.2/classes/class_int.html");
+	script_type_documentation.insert(Variant::Type::REAL, "https://docs.godotengine.org/en/3.2/classes/class_float.html");
+	script_type_documentation.insert(Variant::Type::STRING, "https://docs.godotengine.org/en/3.2/classes/class_string.html");
+	script_type_documentation.insert(Variant::Type::VECTOR2, "https://docs.godotengine.org/en/3.2/classes/class_vector2.html");
+	script_type_documentation.insert(Variant::Type::RECT2, "https://docs.godotengine.org/en/3.2/classes/class_rect2.html");
+	script_type_documentation.insert(Variant::Type::VECTOR3, "https://docs.godotengine.org/en/3.2/classes/class_vector3.html");
+	script_type_documentation.insert(Variant::Type::TRANSFORM2D, "https://docs.godotengine.org/en/3.2/classes/class_transform2d.html");
+	script_type_documentation.insert(Variant::Type::PLANE, "https://docs.godotengine.org/en/3.2/classes/class_plane.html");
+	script_type_documentation.insert(Variant::Type::QUAT, "https://docs.godotengine.org/en/3.2/classes/class_quat.html");
+	script_type_documentation.insert(Variant::Type::AABB, "https://docs.godotengine.org/en/3.2/classes/class_aabb.html");
+	script_type_documentation.insert(Variant::Type::BASIS, "https://docs.godotengine.org/en/3.2/classes/class_basis.html");
+	script_type_documentation.insert(Variant::Type::TRANSFORM, "https://docs.godotengine.org/en/3.2/classes/class_transform.html");
+	script_type_documentation.insert(Variant::Type::COLOR, "https://docs.godotengine.org/en/3.2/classes/class_color.html");
+	script_type_documentation.insert(Variant::Type::NODE_PATH, "https://docs.godotengine.org/en/3.2/classes/class_nodepath.html");
+	script_type_documentation.insert(Variant::Type::_RID, "https://docs.godotengine.org/en/3.2/classes/class_rid.html");
+	script_type_documentation.insert(Variant::Type::DICTIONARY, "https://docs.godotengine.org/en/3.2/classes/class_dictionary.html");
+	script_type_documentation.insert(Variant::Type::ARRAY, "https://docs.godotengine.org/en/3.2/classes/class_array.html");
+	script_type_documentation.insert(Variant::Type::POOL_BYTE_ARRAY, "https://docs.godotengine.org/en/3.2/classes/class_poolbytearray.html");
+	script_type_documentation.insert(Variant::Type::POOL_INT_ARRAY, "https://docs.godotengine.org/en/3.2/classes/class_poolintarray.html");
+	script_type_documentation.insert(Variant::Type::POOL_REAL_ARRAY, "https://docs.godotengine.org/en/3.2/classes/class_poolrealarray.html");
+	script_type_documentation.insert(Variant::Type::POOL_STRING_ARRAY, "https://docs.godotengine.org/en/3.2/classes/class_poolstringarray.html");
+	script_type_documentation.insert(Variant::Type::POOL_VECTOR2_ARRAY, "https://docs.godotengine.org/en/3.2/classes/class_poolvector2array.html");
+	script_type_documentation.insert(Variant::Type::POOL_VECTOR3_ARRAY, "https://docs.godotengine.org/en/3.2/classes/class_poolvector3array.html");
+	script_type_documentation.insert(Variant::Type::POOL_COLOR_ARRAY, "https://docs.godotengine.org/en/3.2/classes/class_poolcolorarray.html");
+	
 	script_reserved_godot_methods.push_back("_init");
 	script_reserved_godot_methods.push_back("_ready");
 	script_reserved_godot_methods.push_back("_process");
 	script_reserved_godot_methods.push_back("_process_physics");
 	script_reserved_godot_methods.push_back("_enter_tree");
 	script_reserved_godot_methods.push_back("_exit_tree");
-	script_reserved_godot_types.push_back("bool");
-	script_reserved_godot_types.push_back("int");
-	script_reserved_godot_types.push_back("float");
-	script_reserved_godot_types.push_back("String");
-	script_reserved_godot_types.push_back("Vector2");
-	script_reserved_godot_types.push_back("Vector3");
-	script_reserved_godot_types.push_back("Rect2");
-	script_reserved_godot_types.push_back("Transform2D");
-	script_reserved_godot_types.push_back("Transform");
-	script_reserved_godot_types.push_back("Plane");
-	script_reserved_godot_types.push_back("Quat");
-	script_reserved_godot_types.push_back("AABB");
-	script_reserved_godot_types.push_back("Basis");
-	script_reserved_godot_types.push_back("Color");
-	script_reserved_godot_types.push_back("NodePath");
-	script_reserved_godot_types.push_back("RID");
-	script_reserved_godot_types.push_back("Object");
-	script_reserved_godot_types.push_back("Array");
-	script_reserved_godot_types.push_back("Dictionary");
-	script_reserved_godot_types.push_back("PoolByteArray");
-	script_reserved_godot_types.push_back("PoolIntArray");
-	script_reserved_godot_types.push_back("PoolRealArray");
-	script_reserved_godot_types.push_back("PoolStringArray");
-	script_reserved_godot_types.push_back("PoolVector2Array");
-	script_reserved_godot_types.push_back("PoolVector3Array");
-	script_reserved_godot_types.push_back("PoolColorArray");
 }
 
 GodoukenTranslatorV2::~GodoukenTranslatorV2() {
