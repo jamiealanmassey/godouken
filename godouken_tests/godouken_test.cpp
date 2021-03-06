@@ -54,7 +54,7 @@ TEST(TRANSLATOR_TESTS, TEST_EVALUATION_PROPERTY1) {
 	ASSERT_EQ(script_result["script"]["properties"][0]["description"]["detailed"], "Defines health that can be modified to destroy entity");
 	ASSERT_EQ(script_result["script"]["properties"][0]["tags"]["is_godot"], false);
 	ASSERT_EQ(script_result["script"]["properties"][0]["tags"]["is_exported"], false);
-	//ASSERT_EQ(script_result["script"]["properties"][0]["type_info"]["name"], "");
+	ASSERT_EQ(script_result["script"]["properties"][0]["type_info"]["name"], "nil");
 	ASSERT_EQ(script_result["script"]["properties"][0]["type_info"]["href"], "");
 
 	ASSERT_EQ(script_result["script"]["properties"][1]["name"], "health_max");
@@ -62,7 +62,8 @@ TEST(TRANSLATOR_TESTS, TEST_EVALUATION_PROPERTY1) {
 	ASSERT_EQ(script_result["script"]["properties"][1]["description"]["detailed"], "");
 	ASSERT_EQ(script_result["script"]["properties"][1]["tags"]["is_godot"], true);
 	ASSERT_EQ(script_result["script"]["properties"][1]["tags"]["is_exported"], true);
-	ASSERT_EQ(script_result["script"]["properties"][1]["type_info"]["href"], "https://docs.godotengine.org/en/3.2/classes/class_int.html");
+	ASSERT_EQ(script_result["script"]["properties"][1]["type_info"]["name"], "int");
+	ASSERT_EQ(script_result["script"]["properties"][1]["type_info"]["href"], "https://docs.godotengine.org/en/stable/classes/class_int.html");
 }
 
 TEST(TRANSLATOR_TESTS, TEST_EVALUATION_PROPERTY2) {
@@ -95,7 +96,7 @@ int32_t GodoukenTest::execute_tests() {
 
 	if (!dir->file_exists(dir_test_scripts + "property_test_script1.gd")) {
 		FileAccess *file = FileAccess::create(FileAccess::AccessType::ACCESS_RESOURCES);
-		file->reopen(dir_test_scripts + "property_test_script1.gd", FileAccess::WRITE);
+		file->open(dir_test_scripts + "property_test_script1.gd", FileAccess::WRITE);
 		file->store_string(property_script_1);
 		file->close();
 		memdelete(file);

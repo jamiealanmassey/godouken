@@ -683,14 +683,25 @@ void GodoukenTranslatorV2::evaluate_property(nlohmann::json &p_script_json, cons
 	GodoukenScriptTranslatorCommentParser *comment_parser = memnew(GodoukenScriptTranslatorCommentParser);
 	comment_parser->parse(script_lines, script_line_begin, script_line_finish);
 
+	bool type_is_godot = p_property_info.type != Variant::NIL && p_property_info.type != Variant::OBJECT;
+	bool type_is_exported = (p_property_info.usage & PROPERTY_USAGE_EDITOR) == PROPERTY_USAGE_EDITOR;
+	
+	String type_str = Variant::get_type_name(p_property_info.type).to_lower();
+	StringBuilder type_builder = StringBuilder();
+	if (type_is_godot) {
+		type_builder += "https://docs.godotengine.org/en/stable/classes/class_";
+		type_builder += type_str;
+		type_builder += ".html";
+	}
+	
 	nlohmann::json property_json = nlohmann::json::object();
 	property_json["name"] = p_property_info.name.utf8();
 	property_json["description"]["brief"] = comment_parser->get_data_set_first("@brief")->comment_body.utf8();
 	property_json["description"]["detailed"] = comment_parser->get_data_set_first("@detailed")->comment_body.utf8();
-	property_json["type_info"]["name"] = ""; //p_property_info.name.utf8();
-	property_json["type_info"]["href"] = script_type_documentation.has(p_property_info.type) ? script_type_documentation[p_property_info.type].utf8() : "";
-	property_json["tags"]["is_godot"] = (p_property_info.type != Variant::NIL && p_property_info.type != Variant::OBJECT);
-	property_json["tags"]["is_exported"] = (p_property_info.usage & PROPERTY_USAGE_EDITOR) == PROPERTY_USAGE_EDITOR;
+	property_json["type_info"]["name"] = type_str.utf8();
+	property_json["type_info"]["href"] = type_builder.as_string().utf8();
+	property_json["tags"]["is_godot"] = type_is_godot;
+	property_json["tags"]["is_exported"] = type_is_exported;
 	p_script_json["script"]["properties"].push_back(property_json);
 }
 
