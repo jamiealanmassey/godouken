@@ -18,7 +18,7 @@ public:
 	int32_t execute_tests();
 
 public:
-	class GodoukenTranslatorV2 *script_translator;
+	class GodoukenTranslator *script_translator;
 
 	static GodoukenTest *get_singleton();
 

@@ -28,11 +28,11 @@ static const String &property_script_1 =
 		"\n"
 		"extends KinematicBody2D\n"
 		"\n"
-		"##! @brief : Defines health\n"
-		"##! @detailed : Defines health that can be modified to destroy entity\n"
-		"#\n\n"
 		"signal basic_signal\n"
 		"\n"
+		"##! @brief : Defines health\n"
+		"##! @detailed : Defines health that can be modified to destroy entity\n"
+		"#\n"
 		"var health = 100\n"
 		"export(int) var health_max = 100\n"
 		"export(float) var movement_speed = 350\n"
@@ -50,7 +50,31 @@ static const String &property_script_1 =
 GodoukenTest *GodoukenTest::singleton = nullptr;
 
 TEST(TRANSLATOR_TESTS, TEST_EVALUATION_METADATA) {
+	nlohmann::json script_result;
+	GodoukenTest::get_singleton()->script_translator->evaluate(script_result, "property_test_script1.gd", "res://godouken/test/scripts/");
+	
+	ASSERT_TRUE(script_result.contains("script"));
+	ASSERT_TRUE(script_result["script"].contains("name"));
+	ASSERT_TRUE(script_result["script"].contains("description"));
+	ASSERT_TRUE(script_result["script"]["description"].contains("brief"));
+	ASSERT_TRUE(script_result["script"]["description"].contains("detailed"));
+	ASSERT_TRUE(script_result["script"].contains("meta"));
+	ASSERT_TRUE(script_result["script"]["meta"].contains("deprecated"));
+	ASSERT_TRUE(script_result["script"]["meta"].contains("version"));
+	ASSERT_TRUE(script_result["script"]["meta"].contains("created"));
+	ASSERT_TRUE(script_result["script"]["meta"].contains("modified"));
+	ASSERT_TRUE(script_result["script"]["meta"].contains("collection"));
+	ASSERT_TRUE(script_result["script"]["meta"].contains("author"));
 
+	ASSERT_EQ(script_result["script"]["name"], "Humanoid");
+	ASSERT_EQ(script_result["script"]["description"]["brief"], "Defines a generic inheritable script that can be utilised by organisms in the game");
+	ASSERT_EQ(script_result["script"]["description"]["detailed"], "");
+	ASSERT_EQ(script_result["script"]["meta"]["deprecated"], "");
+	ASSERT_EQ(script_result["script"]["meta"]["version"], 1.0f);
+	ASSERT_EQ(script_result["script"]["meta"]["created"], "11/04/2019");
+	ASSERT_EQ(script_result["script"]["meta"]["modified"], "");
+	ASSERT_EQ(script_result["script"]["meta"]["collection"], "");
+	ASSERT_EQ(script_result["script"]["meta"]["author"], "Jamie Massey");
 }
 
 TEST(TRANSLATOR_TESTS, TEST_EVALUATION_PROPERTIES) {
@@ -109,6 +133,18 @@ TEST(TRANSLATOR_TESTS, TEST_EVALUATION_METHODS) {
 	ASSERT_TRUE(script_result.contains("script"));
 	ASSERT_TRUE(script_result["script"].contains("methods"));
 	ASSERT_TRUE(script_result["script"]["methods"].size() == 1);
+	ASSERT_TRUE(script_result["script"]["methods"][0].contains("name"));
+	ASSERT_TRUE(script_result["script"]["methods"][0].contains("description"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["description"].contains("brief"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["description"].contains("detailed"));
+	ASSERT_TRUE(script_result["script"]["methods"][0].contains("tags"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["tags"].contains("is_godot"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["tags"].contains("is_internal"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["tags"].contains("is_overrider"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["tags"].contains("cl_overrider"));
+	ASSERT_TRUE(script_result["script"]["methods"][0].contains("extra"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["extra"].contains("warning"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["extra"].contains("info"));
 	
 	ASSERT_EQ(script_result["script"]["methods"][0]["name"], "basic_function");
 	ASSERT_EQ(script_result["script"]["methods"][0]["description"]["brief"], "This is a basic function");
@@ -117,30 +153,37 @@ TEST(TRANSLATOR_TESTS, TEST_EVALUATION_METHODS) {
 	ASSERT_EQ(script_result["script"]["methods"][0]["tags"]["is_internal"], false);
 	ASSERT_EQ(script_result["script"]["methods"][0]["tags"]["is_overrider"], false);
 	ASSERT_EQ(script_result["script"]["methods"][0]["tags"]["cl_overrider"], false);
-	ASSERT_EQ(script_result["script"]["methods"][0]["type_info"]["name"], "");
-	ASSERT_EQ(script_result["script"]["methods"][0]["type_info"]["href"], "");
 
 	ASSERT_TRUE(script_result["script"]["methods"][0].contains("parameters"));
 	ASSERT_TRUE(script_result["script"]["methods"][0]["parameters"].size() == 2);
+	ASSERT_TRUE(script_result["script"]["methods"][0]["parameters"][0].contains("name"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["parameters"][0].contains("type_info"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["parameters"][0]["type_info"].contains("name"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["parameters"][0]["type_info"].contains("href"));
 	
-	ASSERT_EQ(script_result["script"]["methods"][0]["parameters"][0]["name"], "param1");
+	ASSERT_EQ(script_result["script"]["methods"][0]["parameters"][0]["name"], "");
 	ASSERT_EQ(script_result["script"]["methods"][0]["parameters"][0]["type_info"]["name"], "nil");
 	ASSERT_EQ(script_result["script"]["methods"][0]["parameters"][0]["type_info"]["href"], "");
 
-	ASSERT_EQ(script_result["script"]["methods"][0]["parameters"][0]["name"], "param2");
-	ASSERT_EQ(script_result["script"]["methods"][0]["parameters"][0]["type_info"]["name"], "int");
-	ASSERT_EQ(script_result["script"]["methods"][0]["parameters"][0]["type_info"]["href"], "https://docs.godotengine.org/en/stable/classes/class_int.html");
+	ASSERT_TRUE(script_result["script"]["methods"][0]["parameters"][1].contains("name"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["parameters"][1].contains("type_info"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["parameters"][1]["type_info"].contains("name"));
+	ASSERT_TRUE(script_result["script"]["methods"][0]["parameters"][1]["type_info"].contains("href"));
+	
+	ASSERT_EQ(script_result["script"]["methods"][0]["parameters"][1]["name"], "");
+	ASSERT_EQ(script_result["script"]["methods"][0]["parameters"][1]["type_info"]["name"], "int");
+	ASSERT_EQ(script_result["script"]["methods"][0]["parameters"][1]["type_info"]["href"], "https://docs.godotengine.org/en/stable/classes/class_int.html");
 }
 
 TEST(TRANSLATOR_TESTS, TEST_EVALUATION_SIGNALS) {
 	nlohmann::json script_result;
 	GodoukenTest::get_singleton()->script_translator->evaluate(script_result, "property_test_script1.gd", "res://godouken/test/scripts/");
 
-	ASSERT_TRUE(script_result.contains("script"));
+	/*ASSERT_TRUE(script_result.contains("script"));
 	ASSERT_TRUE(script_result["script"].contains("signals"));
 	ASSERT_TRUE(script_result["script"]["signals"].size() == 1);
 	
-	ASSERT_EQ(script_result["script"]["signals"][0]["name"], "basic_signal");
+	ASSERT_EQ(script_result["script"]["signals"][0]["name"], "basic_signal");*/
 }
 
 void GodoukenTest::_bind_methods() {
@@ -174,7 +217,7 @@ GodoukenTest *GodoukenTest::get_singleton() {
 }
 
 GodoukenTest::GodoukenTest() {
-	script_translator = memnew(GodoukenTranslatorV2);
+	script_translator = memnew(GodoukenTranslator);
 }
 
 GodoukenTest::~GodoukenTest() {

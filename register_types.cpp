@@ -12,7 +12,7 @@
 #include "godouken_editor_pane.h"
 #include "godouken_tests/godouken_test.h"
 
-GodoukenScriptTranslator *godouken_script_translator = nullptr;
+GodoukenTranslator *godouken_script_translator = nullptr;
 
 #ifdef TOOLS_ENABLED
 static void _initiialise_editor_pane() {
@@ -26,7 +26,7 @@ static void _initiialise_editor_pane() {
 void register_godouken_types() {
 	ClassDB::register_class<Godouken>();
 	ClassDB::register_class<GodoukenDataModel>();
-	ClassDB::register_class<GodoukenTranslatorV2>();
+	ClassDB::register_class<GodoukenTranslator>();
 	ClassDB::register_class<GodoukenTest>();
 
 	#ifdef TOOLS_ENABLED
