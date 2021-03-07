@@ -153,7 +153,6 @@ protected:
 	int32_t script_line_finish;
 
 	Vector<String> script_lines;
-	Map<Variant::Type, String> script_type_documentation;
 	List<String> script_keys;
 	List<String> script_reserved_godot_methods;
 	List<String> script_reserved_godot_types;
@@ -162,6 +161,7 @@ protected:
 
 private:
 	const Dictionary get_members_to_line(const Ref<Script> &p_script);
+	const bool get_sorted_key(const Variant &p_variant_1, const Variant &p_variant_2);
 	const Array &get_sorted_keys(Array &p_keys);
 
 	const List<String> get_script_lines(const FileAccess *p_script_file);
