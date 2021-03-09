@@ -187,7 +187,7 @@ void GodoukenTranslator::evaluate_signal(nlohmann::json &p_script_json, const Me
 
 	nlohmann::json signal_json = nlohmann::json::object();
 	signal_json["name"] = p_signal_info.name.utf8();
-	p_script_json["signals"].push_back(signal_json);
+	p_script_json["data"]["script"]["signals"].push_back(signal_json);
 }
 
 void GodoukenTranslator::evaluate_method(nlohmann::json &p_script_json, const MethodInfo &p_method_info) const {
@@ -244,7 +244,7 @@ void GodoukenTranslator::evaluate_method(nlohmann::json &p_script_json, const Me
 		method_json["see"].push_back(comment_also_set[i]->comment_body.utf8());
 	}
 
-	p_script_json["script"]["methods"].push_back(method_json);
+	p_script_json["data"]["script"]["methods"].push_back(method_json);
 }
 
 void GodoukenTranslator::evaluate_property(nlohmann::json &p_script_json, const PropertyInfo &p_property_info) const {
@@ -265,21 +265,21 @@ void GodoukenTranslator::evaluate_property(nlohmann::json &p_script_json, const 
 	property_json["type_info"]["href"] = type_href.utf8();
 	property_json["tags"]["is_godot"] = type_is_godot;
 	property_json["tags"]["is_exported"] = type_is_exported;
-	p_script_json["script"]["properties"].push_back(property_json);
+	p_script_json["data"]["script"]["properties"].push_back(property_json);
 }
 
 void GodoukenTranslator::evaluate_script(nlohmann::json &p_script_json, const Array &p_members_to_keys) {
 	GodoukenScriptTranslatorCommentParser *comment_parser = memnew(GodoukenScriptTranslatorCommentParser);
 	comment_parser->parse(script_lines, 0, script_line_begin);
-	p_script_json["script"]["name"] = comment_parser->get_data_set_first("@name")->comment_body.utf8();
-	p_script_json["script"]["description"]["brief"] = comment_parser->get_data_set_first("@brief")->comment_body.utf8();
-	p_script_json["script"]["description"]["detailed"] = comment_parser->get_data_set_first("@detailed")->comment_body.utf8();
-	p_script_json["script"]["meta"]["deprecated"] = comment_parser->get_data_set_first("@deprecated")->comment_body.utf8();
-	p_script_json["script"]["meta"]["version"] = comment_parser->get_data_set_first("@version")->comment_body.to_float();
-	p_script_json["script"]["meta"]["created"] = comment_parser->get_data_set_first("@created")->comment_body.utf8();
-	p_script_json["script"]["meta"]["modified"] = comment_parser->get_data_set_first("@modified")->comment_body.utf8();
-	p_script_json["script"]["meta"]["collection"] = comment_parser->get_data_set_first("@collection")->comment_body.utf8();
-	p_script_json["script"]["meta"]["author"] = comment_parser->get_data_set_first("@author")->comment_body.utf8();
+	p_script_json["data"]["script"]["name"] = comment_parser->get_data_set_first("@name")->comment_body.utf8();
+	p_script_json["data"]["script"]["description"]["brief"] = comment_parser->get_data_set_first("@brief")->comment_body.utf8();
+	p_script_json["data"]["script"]["description"]["detailed"] = comment_parser->get_data_set_first("@detailed")->comment_body.utf8();
+	p_script_json["data"]["script"]["meta"]["deprecated"] = comment_parser->get_data_set_first("@deprecated")->comment_body.utf8();
+	p_script_json["data"]["script"]["meta"]["version"] = comment_parser->get_data_set_first("@version")->comment_body.to_float();
+	p_script_json["data"]["script"]["meta"]["created"] = comment_parser->get_data_set_first("@created")->comment_body.utf8();
+	p_script_json["data"]["script"]["meta"]["modified"] = comment_parser->get_data_set_first("@modified")->comment_body.utf8();
+	p_script_json["data"]["script"]["meta"]["collection"] = comment_parser->get_data_set_first("@collection")->comment_body.utf8();
+	p_script_json["data"]["script"]["meta"]["author"] = comment_parser->get_data_set_first("@author")->comment_body.utf8();
 	
 	for (int32_t i = 0; i < p_members_to_keys.size(); i++) {
 		const String &member_name = p_members_to_keys.get(i);

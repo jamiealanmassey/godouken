@@ -1,10 +1,16 @@
 #include "godouken_editor_pane.h"
 #include "godouken_tests/godouken_test.h"
 
+#include "godouken_script_translator.h"
+
 #include "editor/editor_node.h"
 #include "editor/editor_scale.h"
 #include "core/os/file_access.h"
 #include "core/class_db.h"
+
+#include "third_party/inja.hpp"
+
+#include "stencils/godouken_stencil_class.h"
 
 GodoukenEditorPane *GodoukenEditorPane::singleton = nullptr;
 
@@ -12,6 +18,41 @@ void GodoukenEditorPane::_on_pressed_test() {
 	GodoukenTest *godouken_test = memnew(GodoukenTest);
 	godouken_test->execute_tests();
 	memdelete(godouken_test);
+
+	nlohmann::json script_result = nlohmann::json::object();
+	GodoukenTranslator *godouken_translator = memnew(GodoukenTranslator);
+	godouken_translator->evaluate(script_result, "humanoid.gd", "res://assets/entities/_base/");
+	script_result["data"]["project_title"] = "";
+	script_result["data"]["script"]["breadcrumbs"] = nlohmann::json::array();
+	
+	/*const String &dir_test_scripts = "res://godouken/test/scripts/";
+	DirAccess *dir = DirAccess::create(DirAccess::AccessType::ACCESS_RESOURCES);
+	if (!dir->dir_exists(dir_test_scripts)) {
+		dir->make_dir_recursive(dir_test_scripts);
+	}
+
+	String file_contents = "";
+	FileAccess *file = FileAccess::create(FileAccess::AccessType::ACCESS_RESOURCES);
+	file->open(dir_test_scripts + "property_test_script1.gd", FileAccess::READ);
+	file_contents = file->get_as_utf8_string();
+	file->close();
+	memdelete(file);*/
+	
+	inja::Environment env;
+
+	const std::string result = env.render(godouken_stencil_class, script_result);
+	const String &dir_scripts = "res://godouken/scripts/";
+	DirAccess *dir = DirAccess::create(DirAccess::AccessType::ACCESS_RESOURCES);
+	if (!dir->dir_exists(dir_scripts)) {
+		dir->make_dir_recursive(dir_scripts);
+	}
+
+	FileAccess *file = FileAccess::create(FileAccess::AccessType::ACCESS_RESOURCES);
+	file->reopen(dir_scripts + "humanoid.html", FileAccess::WRITE);
+	file->store_string(result.c_str());
+	file->close();
+	memdelete(file);
+	memdelete(godouken_translator);
 }
 
 void GodoukenEditorPane::_bind_methods() {
