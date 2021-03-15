@@ -50,14 +50,12 @@ void GodoukenDataModel::data() {
 		godouken_translator->evaluate(godouken_model[directory_script.data_name].data_json, directory_script.data_file, directory_script.data_directory);
 		memdelete(godouken_translator);
 	}
-
-	godouken_model.front();
-
+	
 	for (Map<String, GodoukenDataEntry>::Element *E = godouken_model.front(); E; E = E->next()) {
 		inja::Environment env;
 
 		GodoukenDataEntry &script_entry = E->value();
-		script_entry.data_json["data"]["project"]["title"] = "";
+		script_entry.data_json["data"]["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().utf8();
 		script_entry.data_json["data"]["script"]["breadcrumbs"] = nlohmann::json::array();
 		
 		const std::string result = env.render(godouken_stencil_class, script_entry.data_json);
