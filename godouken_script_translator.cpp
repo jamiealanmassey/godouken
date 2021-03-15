@@ -181,6 +181,21 @@ void GodoukenTranslator::get_type_info(String &p_type_name, String &p_type_href,
 	p_type_href = type_builder.as_string();
 }
 
+void GodoukenTranslator::populate(nlohmann::json &p_script_json) {
+	p_script_json["data"]["script"]["name"] = "";
+	p_script_json["data"]["script"]["description"]["brief"] = "";
+	p_script_json["data"]["script"]["description"]["detailed"] = "";
+	p_script_json["data"]["script"]["meta"]["deprecated"] = "";
+	p_script_json["data"]["script"]["meta"]["version"] = "";
+	p_script_json["data"]["script"]["meta"]["created"] = "";
+	p_script_json["data"]["script"]["meta"]["modified"] = "";
+	p_script_json["data"]["script"]["meta"]["collection"] = "";
+	p_script_json["data"]["script"]["meta"]["author"] = "";
+	p_script_json["data"]["script"]["properties"] = nlohmann::json::array();
+	p_script_json["data"]["script"]["methods"] = nlohmann::json::array();
+	p_script_json["data"]["script"]["signals"] = nlohmann::json::array();
+}
+
 void GodoukenTranslator::evaluate_signal(nlohmann::json &p_script_json, const MethodInfo &p_signal_info) const {
 	GodoukenScriptTranslatorCommentParser *comment_parser = memnew(GodoukenScriptTranslatorCommentParser);
 	comment_parser->parse(script_lines, script_line_begin, script_line_finish);
@@ -280,7 +295,7 @@ void GodoukenTranslator::evaluate_script(nlohmann::json &p_script_json, const Ar
 	p_script_json["data"]["script"]["meta"]["modified"] = comment_parser->get_data_set_first("@modified")->comment_body.utf8();
 	p_script_json["data"]["script"]["meta"]["collection"] = comment_parser->get_data_set_first("@collection")->comment_body.utf8();
 	p_script_json["data"]["script"]["meta"]["author"] = comment_parser->get_data_set_first("@author")->comment_body.utf8();
-	
+
 	for (int32_t i = 0; i < p_members_to_keys.size(); i++) {
 		const String &member_name = p_members_to_keys.get(i);
 		Object *member_data_ptr = script_members_to_line[member_name];
@@ -307,6 +322,7 @@ void GodoukenTranslator::evaluate_script(nlohmann::json &p_script_json, const Ar
 }
 
 void GodoukenTranslator::evaluate(nlohmann::json &p_script_json, const String &p_code) {
+	GodoukenTranslator::populate(p_script_json);
 	script = memnew(GDScript);
 	script->set_source_code(p_code);
 	script->reload(true);

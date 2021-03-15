@@ -116,6 +116,8 @@ private:
 	static int32_t get_script_line_begin(const Vector<String> &p_script_lines);
 	static void get_type_info(String &p_type_name, String &p_type_href, bool &p_type_is_godot, const PropertyInfo &p_property_info);
 
+	static void populate(nlohmann::json &p_script_json);
+	
 public:
 	void evaluate_signal(nlohmann::json &p_script_json, const MethodInfo &p_signal_info) const;
 	void evaluate_method(nlohmann::json &p_script_json, const MethodInfo &p_method_info) const;

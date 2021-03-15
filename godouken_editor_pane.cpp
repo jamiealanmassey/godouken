@@ -7,6 +7,7 @@
 #include "editor/editor_scale.h"
 #include "core/os/file_access.h"
 #include "core/class_db.h"
+#include "godouken_data_model.h"
 
 #include "third_party/inja.hpp"
 
@@ -38,7 +39,7 @@ void GodoukenEditorPane::_on_pressed_test() {
 	file->close();
 	memdelete(file);*/
 	
-	inja::Environment env;
+	/*inja::Environment env;
 
 	const std::string result = env.render(godouken_stencil_class, script_result);
 	const String &dir_scripts = "res://godouken/scripts/";
@@ -52,7 +53,10 @@ void GodoukenEditorPane::_on_pressed_test() {
 	file->store_string(result.c_str());
 	file->close();
 	memdelete(file);
-	memdelete(godouken_translator);
+	memdelete(godouken_translator);*/
+
+	GodoukenDataModel *godouken_data_model = memnew(GodoukenDataModel);
+	godouken_data_model->data();
 }
 
 void GodoukenEditorPane::_bind_methods() {
