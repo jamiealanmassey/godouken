@@ -1,4 +1,7 @@
-# Godouken
+<div style="text-align:center">
+    <img src="./icons/logo_detailed_md.PNG" />
+</div>
+
 ## What is Godouken?
 **Godouken** is a lightweight, non-intrusive and integrated [GDScript](https://docs.godotengine.org/en/stable/getting_started/scripting/gdscript/gdscript_basics.html) API documentation tool for all your [Godot](https://godotengine.org) projects. The aim of the project is to make sharing documentation for your games as simple as possible, increasing the productivity of teams, and/or to serve as a reference for the single programmer.
 
