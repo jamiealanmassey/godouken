@@ -10,6 +10,8 @@
 #include "godouken_data_model.h"
 #include "godouken_script_translator.h"
 #include "godouken_editor_pane.h"
+
+#include "godouken_tests/godouken_test_flag.h"
 #include "godouken_tests/godouken_test.h"
 
 GodoukenTranslator *godouken_script_translator = nullptr;
@@ -27,7 +29,10 @@ void register_godouken_types() {
 	ClassDB::register_class<Godouken>();
 	ClassDB::register_class<GodoukenDataModel>();
 	ClassDB::register_class<GodoukenTranslator>();
+
+#ifdef GODOUKEN_TEST
 	ClassDB::register_class<GodoukenTest>();
+#endif // GODOUKEN_TEST
 
 	#ifdef TOOLS_ENABLED
 	ClassDB::set_current_api(ClassDB::API_EDITOR);

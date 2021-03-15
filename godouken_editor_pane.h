@@ -10,19 +10,34 @@
 #include "scene/gui/box_container.h"
 #include "scene/gui/rich_text_label.h"
 
+#include "godouken_tests/godouken_test_flag.h"
+
 class GodoukenEditorPane : public VBoxContainer {
 	GDCLASS(GodoukenEditorPane, VBoxContainer);
 
 private:
 	Label *pane_title;
-	Button *pane_button_test;
 	ToolButton *pane_tool_button;
 	RichTextLabel *pane_log;
+
+	Button *pane_button_generate;
+	Button *pane_button_clean;
+	Button *pane_button_settings;
+	
+#ifdef GODOUKEN_TEST
+	Button *pane_button_test;
+#endif // GODOUKEN_TEST
 
 	static GodoukenEditorPane *singleton;
 
 private:
+#ifdef GODOUKEN_TEST
 	void _on_pressed_test();
+#endif // GODOUKEN_TEST
+	
+	void _on_pressed_generate();
+	void _on_pressed_clean();
+	void _on_pressed_settings();
 
 protected:
 	static void _bind_methods();

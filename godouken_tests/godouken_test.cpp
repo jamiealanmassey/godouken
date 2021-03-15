@@ -1,3 +1,9 @@
+/* godouken_test.cpp */
+
+#include "godouken_test_flag.h"
+
+#ifdef GODOUKEN_TEST
+
 #include "godouken_test.h"
 #include "gtest/gtest.h"
 
@@ -226,3 +232,5 @@ GodoukenTest::GodoukenTest() {
 GodoukenTest::~GodoukenTest() {
 	memdelete(script_translator);
 }
+
+#endif // GODOUKEN_TEST

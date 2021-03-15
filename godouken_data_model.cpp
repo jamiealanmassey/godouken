@@ -6,6 +6,7 @@
 #include "editor/editor_scale.h"
 #include "core/os/file_access.h"
 #include "core/class_db.h"
+
 #include "godouken_script_translator.h"
 #include "stencils/godouken_stencil_class.h"
 #include "third_party/inja.hpp"
@@ -57,7 +58,7 @@ void GodoukenDataModel::data() {
 		inja::Environment env;
 
 		GodoukenDataEntry &script_entry = E->value();
-		script_entry.data_json["data"]["project"]["title"] = "";
+		script_entry.data_json["data"]["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().utf8();
 		script_entry.data_json["data"]["script"]["breadcrumbs"] = nlohmann::json::array();
 		
 		const std::string result = env.render(godouken_stencil_class, script_entry.data_json);

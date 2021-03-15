@@ -3,6 +3,9 @@
 #ifndef GODOUKEN_TEST_H
 #define GODOUKEN_TEST_H
 
+#include "godouken_test_flag.h"
+
+#ifdef GODOUKEN_TEST
 #include "core/object.h"
 
 class GodoukenTest : public Object {
@@ -27,4 +30,5 @@ public:
 	~GodoukenTest();
 };
 
+#endif // GODOUKEN_TEST
 #endif // GODOUKEN_TEST_H
