@@ -5,11 +5,21 @@
 #include "core/ustring.h"
 #include "core/object.h"
 #include "core/map.h"
+#include "third_party/json.hpp"
 
 #ifndef GODOUKEN_DATA_MODEL_H
 #define GODOUKEN_DATA_MODEL_H
 
-typedef Map<String, GodoukenDataNodeBase*> GodoukenIndexer;
+typedef Map<String, GodoukenData *> GodoukenIndexer;
+
+struct GodoukenDataEntry {
+	String data_name;
+	String data_file;
+	String data_directory;
+	nlohmann::json data_json;
+
+	static Vector<String> extract_breadcrumbs(const String &p_directory_path);
+};
 
 class GodoukenDataModel : public Object {
     GDCLASS(GodoukenDataModel, Object);
@@ -20,8 +30,10 @@ protected:
     GodoukenIndexer model_node_indices;
 
 public:
-    void node_index_refresh(GodoukenDataNodeBase *p_node);
-    void node_index_insert(GodoukenDataNodeBase *p_node);
+	void data();
+	
+    void node_index_refresh(GodoukenData *p_node);
+    void node_index_insert(GodoukenData *p_node);
 
     void script_parse(const String &p_script_file);
 
@@ -31,6 +43,8 @@ public:
     GodoukenDataNodeBase *get_node_root();
     GodoukenDataNodeBase *get_node_from_indexer(const String &p_entry_name);
 
+	Map<String, GodoukenDataEntry> godouken_model;
+	
 public:
     GodoukenDataModel();
     ~GodoukenDataModel();

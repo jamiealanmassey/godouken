@@ -1,9 +1,9 @@
 <html>
 	<head>
-		<title>{{ data.project_title }} /// {{ data.script.name }}</title>
+		<title>{{ data.project.title }} {% if data.script.name %} - {{ data.script.name }} {% endif %}</title>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-        <link rel="stylesheet" href="./../css/style_shared.css">
-        <link rel="stylesheet" href="./../css/style_class.css">
+		<link rel="stylesheet" href="./../css/style_shared.css">
+		<link rel="stylesheet" href="./../css/style_class.css">
 	</head>
 	<body>
 		<div class="container-fluid h-100" id="main-content">
@@ -11,23 +11,55 @@
 				<div class="col-2 h-100 d-flex flex-column p-0" id="sidebar">
 					<div id="logo-container" class="container-fluid p-1">
 						<div class="mb-2">
-							<!--<a href="script_humanoid.html">
-								<img class="img img-rounded bounceIn" src="document-icon.png" width="100%">
-							</a>-->
 							<div class="mt-3 text-center">
-								<strong class="project-header border-bottom">{{ data.project_title }}</strong>
+								<strong class="project-header border-bottom">{{ data.project.title }}</strong>
 							</div>
 						</div>
 					</div>
-                    <iframe src="./class_navigation.html"></iframe>
+					<div id="sidebar-nav" class="container-fluid p-0 scroll-y">
+						<ul>
+							<li class="tree-item-heading">OVERVIEW</li>
+							<li class="tree-item"><a href="#">Introduction</a></li>
+							<li class="tree-item"><a href="#">Project Graph</a></li>
+							<li class="tree-item"><a href="#">About</a></li>
+							<li class="tree-item"><a href="#">Todos</a></li>
+							<li class="tree-item"><a href="#">Roadmaps</a></li>
+							<li class="tree-item-heading">COLLECTIONS</li>
+							<li class="tree-item"><a href="#">Entities</a></li>
+							<li class="tree-item"><a href="#">Levels</a></li>
+							<li class="tree-item"><a href="#">Systems</a></li>
+							<li class="tree-item"><a href="#">Menus</a></li>
+							<li class="tree-item-heading">SCRIPT API</li>
+							<li class="tree-item"><a href="#">DefaultWeapon</a></li>
+							<li class="tree-item"><a href="#">Enemy</a></li>
+							<li class="tree-item"><a href="#">EnemyState</a></li>
+							<li class="tree-item"><a href="#">Humanoid</a></li>
+							<li class="tree-item"><a href="#">InfantryPilot</a></li>
+							<li class="tree-item"><a href="#">Kitten</a></li>
+							<li class="tree-item"><a href="#">LevelUI</a></li>
+							<li class="tree-item"><a href="#">MainMenu</a></li>
+							<li class="tree-item"><a href="#">ManagerGame</a></li>
+							<li class="tree-item"><a href="#">ManagerLevel</a></li>
+							<li class="tree-item"><a href="#">Player</a></li>
+							<li class="tree-item"><a href="#">PlayerKeystate</a></li>
+							<li class="tree-item"><a href="#">PlayerKeystateSorter</a></li>
+							<li class="tree-item"><a href="#">StatWidget</a></li>
+							<li class="tree-item"><a href="#">Upgrade</a></li>
+							<li class="tree-item"><a href="#">UpgradeProjectile</a></li>
+							<li class="tree-item"><a href="#">UpgradeSocket</a></li>
+							<li class="tree-item"><a href="#">UpgradeStats</a></li>
+							<li class="tree-item"><a href="#">UpgradeSystem</a></li>
+							<li class="tree-item"><a href="#">UpgradeType</a></li>
+						</ul>
+					</div>
 				</div>
 				<div class="col-10 h-100 d-flex flex-column scroll-y">
-					<div class="mt-3">
+					<div class="my-3">
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb">
-								{% for crumb in data.script.breadcrumbs %}
-                                <li class="breadcrumb-item"><a href="#">{{ crumb }}</a></li>
-                                {% endfor %}
+							{% for crumb in data.script.breadcrumbs %}
+							<li class="breadcrumb-item"><a href="#">{{ crumb }}</a></li>
+							{% endfor %}
 							</ol>
 						</nav>
 						<div id="content-script-tree" class="container mt-5 text-center">
@@ -40,37 +72,38 @@
 								<h2 class="my-0 bounceIn"><strong>{{ data.script.name }}</strong></h2>
 							</div>
 							<div class="row justify-content-center mt-3">
-                                {% if data.script.meta.deprecated %}
+								{% if data.script.meta.deprecated != "" %}
 								<div class="ml-2 d-flex text-white">
 									<div class="widget bg-danger rounded-left mx-0">deprecated</div>
 									<div class="widget bg-dark rounded-right mx-0">{{ data.script.meta.deprecated }}</div>
 								</div>
-                                {% endif %}
-                                {% if data.script.meta.version %}
+								{% endif %}
+								{% if data.script.meta.version != 0 %}
 								<div class="ml-2 d-flex text-white">
 									<span class="widget bg-info rounded-left mx-0">version</span>
 									<span class="widget bg-dark rounded-right mx-0">{{ data.script.meta.version }}</span>
 								</div>
-                                {% endif %}
-                                {% if data.script.meta.created %}
+								{% endif %}
+								{% if data.script.meta.created != "" %}
 								<div class="ml-2 d-flex text-white">
 									<span class="widget bg-success rounded-left mx-0">created</span>
 									<span class="widget bg-dark rounded-right mx-0">{{ data.script.meta.created }}</span>
 								</div>
-                                {% endif %}
-                                {% if data.script.meta.modified %}
+								{% endif %}
+								{% if data.script.meta.modified != "" %}
 								<div class="ml-2 d-flex text-white">
 									<span class="widget bg-success rounded-left mx-0">last modified</span>
 									<span class="widget bg-dark rounded-right mx-0">{{ data.script.meta.modified }}</span>
 								</div>
-                                {% endif %}
-                                {% if data.script.meta.collection %}
+								{% endif %}
+								{% if data.script.meta.collection != "" %}
 								<div class="ml-2 d-flex text-white">
 									<span class="widget bg-warning rounded-left mx-0">collection</span>
 									<span class="widget bg-dark rounded-right mx-0">{{ data.script.meta.collection }}</span>
 								</div>
-                                {% endif %}
+								{% endif %}
 							</div>
+							{% if data.script.description.brief %}
 							<div class="description">
 								<div class="row mt-4">
 									<h3 class="special-1">Brief Description</h3>
@@ -79,6 +112,8 @@
 									<i>{{ data.script.description.brief }}</i>
 								</div>
 							</div>
+							{% endif %}
+							{% if data.script.description.detailed %}
 							<div class="description">
 								<div class="row mt-4">
 									<h3 class="special-1">Detailed Description</h3>
@@ -87,8 +122,9 @@
 									<i>{{ data.script.description.detailed }}</i>
 								</div>
 							</div>
+							{% endif %}
 						</div>
-						<div id="content-main-body" class="container mt-4">
+						<div id="content-main-body" class="container my-3">
 							<div class="row">
 								<h5 class="special-1">Script Properties</h5>
 								<table class="table table-sm mt-3">
@@ -100,454 +136,74 @@
 										</tr>
 									</thead>
 									<tbody>
-                                        {% for property in data.script.properties %}
-                                        <tr>
-                                            <td>{% if property.type_info.href %}<a href="{{ property.type_info.href }}" target="_blank">{{ property.type_info.name }}</a>{% else %}{{ property.type_info.name }}{% endif %}</td>
-                                            <td><a href="#{{ property.name }}">{{ property.name }}</a></td>
-                                                {% if property.tags %}
-                                                <td>
-                                                {% if property.tags.is_godot %}
-                                                <div class="d-flex text-white">
-                                                    <span class="widget bg-dark rounded mx-0 px-2">godot type</span>
-                                                </div>
-                                                {% endif %}
-                                                {% if property.tags.is_exported %}
-                                                <div class="d-flex text-white">
-                                                    <span class="widget bg-dark rounded mx-0 px-2">exports // {{ property.type_info.name }}</span>
-                                                </div>
-                                                {% endif %}
-                                            </td>
-                                            {% endif %}
-                                        </tr>
-                                        {% endfor %}
+										{% for property in data.script.properties %}
+										<tr>
+											<td>
+												{% if property.type_info.href %}
+												<a href="{{ property.type_info.href }}" target="_blank">{{ property.type_info.name }}</a>
+												{% else %}
+												{{ property.type_info.name }}
+												{% endif %}
+											</td>
+											<td>
+												<a href="#{{ property.name }}">{{ property.name }}</a>
+											</td>
+											{% if property.tags %}
+											<td>
+												{% if property.tags.is_godot %}
+												<div class="d-flex text-white">
+												<span class="widget bg-dark rounded mx-0 px-2">godot type</span>
+												</div>
+												{% endif %}
+												{% if property.tags.is_exported %}
+												<div class="d-flex text-white">
+												<span class="widget bg-dark rounded mx-0 px-2">exports // {{ property.type_info.name }}</span>
+												</div>
+												{% endif %}
+											</td>
+											{% endif %}
+										</tr>
+										{% endfor %}
 									</tbody>
 								</table>
 							</div>
-							<!--<div class="row mt-3">
-								<h5 class="special-1">Script Methods</h5>
-								<table class="table table-sm mt-3">
-									<thead>
-										<td><strong>Return Type</strong></td>
-										<td><strong>Method Definition</strong></td>
-										<td><strong>Special Tags</strong></td>
-									</thead>
-									<tbody>
-										<tr>
-											<td><a href="#">void</a></td>
-											<td><a href="#">_init</a> ( )</td>
-											<td>
-												<div class="d-flex">
-													<div class="d-flex text-white">
-														<span class="widget bg-info rounded mx-0 px-2">godot method</span>
-													</div>
-													<div class="d-flex text-white ml-2">
-														<span class="widget bg-dark rounded mx-0 px-2">internal / private</span>
-													</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td><a href="#">void</a></td>
-											<td><a href="#">_ready</a> ( )</td>
-											<td>
-												<div class="d-flex">
-													<div class="d-flex text-white">
-														<span class="widget bg-info rounded mx-0 px-2">godot method</span>
-													</div>
-													<div class="d-flex text-white ml-2">
-														<span class="widget bg-dark rounded mx-0 px-2">internal / private</span>
-													</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td><a href="#">void</a></td>
-											<td><a href="#">_physics_process</a> ( <a href="#">float</a> delta ) </a></td>
-											<td>
-												<div class="d-flex">
-													<div class="d-flex text-white">
-														<span class="widget bg-info rounded mx-0 px-2">godot method</span>
-													</div>
-													<div class="d-flex text-white ml-2">
-														<span class="widget bg-dark rounded mx-0 px-2">internal / private</span>
-													</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td><a href="#">void</a></td>
-											<td><a href="#">set_health</a> ( <a href="#">int</a> amount )</a></td>
-											<td>
-											</td>
-										</tr>
-										<tr>
-											<td><a href="#">void</a></td>
-											<td><a href="#">add_health</a> ( <a href="#">int</a> amount )</a></td>
-											<td>
-											</td>
-										</tr>
-										<tr>
-											<td><a href="#">void</a></td>
-											<td><a href="#">_process_health</a> ( )</a></td>
-											<td>
-												<div class="d-flex text-white">
-													<span class="widget bg-dark rounded mx-0 px-2">internal / private</span>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td><a href="#">void</a></td>
-											<td><a href="#">_on_humanoid_death</a> ( )</a></td>
-											<td>
-												<div class="d-flex text-white">
-													<span class="widget bg-dark rounded mx-0 px-2">internal / private</span>
-												</div>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>-->
-							<!--<div class="row mt-3">
-								<h5 class="special-1">Script Signals</h5>
-								<table class="table table-sm mt-3">
-									<thead>
-										<tr>
-											<td><strong>Signal Name</strong></td>
-											<td><strong>Signal Description</strong></td>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td><span class="no-wrap mr-2">humanoid_died ( )</span></td>
-											<td>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.</td>
-										</tr>
-										<tr>
-											<td><span class="no-wrap mr-2">humanoid_hurt ( <a href="https://docs.godotengine.org/en/3.1/classes/class_int.html" target="_blank">int</a> health )</span></td>
-											<td></td>
-										</tr>
-										<tr>
-											<td><span class="no-wrap mr-2">humanoid_health_changed ( <a href="https://docs.godotengine.org/en/3.1/classes/class_int.html" target="_blank">int</a> health )</span></td>
-											<td></td>
-										</tr>
-										<tr>
-											<td><span class="no-wrap mr-2">humanoid_moved ( <a href="https://docs.godotengine.org/en/3.1/classes/class_vector2.html" target="_blank">Vector2</a> location )</span></td>
-											<td></td>
-										</tr>
-									</tbody>
-								</table>
-							</div>-->
 						</div>
-						<div id="content-main-body-detailed" class="container mt-2">
+						<div id="content-main-body-detailed" class="container my-3">
 							<div class="row mt-3">
 								<h3 class="special-1">Property Descriptions</h3>
 								<div class="method-descriptor container-fluid border-left border-success border-3 bg-light mt-3">
-                                    {% for property in data.script.properties %}
-                                    <div class="container-fluid border-left border-info border-3 my-3 ml-2 py-2">
-                                        <div class="row ml-2 mt-2 d-flex flex-column">
-                                            <span class="special-2"><i><strong>Property Signature</strong></i></span>
-                                            <div>
-                                                <h6 class="my-0">
-                                                    {% if property.type_info.href %}
-                                                    <a href="{{ property.type_info.href }}" target="_blank">{{ property.type_info.name }}</a>
-                                                    {% else %}
-                                                    {{ property.type_info.name }}
-                                                    {% endif %}
-                                                    {{ property.name }}
-                                                </h6>
-                                                {% if property.description.detailed %}
-                                                <p>{{ property.description.detailed }}</p>
-                                                {% endif %}
-                                                <p></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
+									{% for property in data.script.properties %}
+									<div class="container-fluid border-left border-info border-3 my-3 ml-2 py-2">
+										<div class="row ml-2 mt-2 d-flex flex-column">
+											<span class="special-2"><i><strong>Property Signature</strong></i></span>
+											<div>
+												<h6 class="my-0">
+													{% if property.type_info.href %}
+													<a href="{{ property.type_info.href }}" target="_blank">{{ property.type_info.name }}</a>&nbsp;
+													{% else %}
+													{{ property.type_info.name }}&nbsp;
+													{% endif %}
+													{{ property.name }}
+												</h6>
+												{% if property.description.brief %}
+												<p>{{ property.description.brief }}</p>
+												{% endif %}
+												{% if property.description.detailed %}
+												<p>{{ property.description.detailed }}</p>
+												{% endif %}
+											</div>
+										</div>
+									</div>
+									{% endfor %}
 								</div>
 							</div>
-							<!--<div class="row mt-3">
-								<h3 class="special-1">Method Descriptions</h3>
-								<div class="method-descriptor container-fluid border-left border-success border-3 bg-light mt-3">
-									<div class="container-fluid border-left border-info border-3 my-3 ml-2 py-2">
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Method Signature</strong></i></span>
-											<div>
-												<h6 class="my-0"><a href="#">void</a> _init ( )</h6>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Brief Description</strong></i></span>
-											<div>
-												<i>calls to _init() as defined by Godot, setups initial variable values</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2">
-											<div class="d-flex">
-												<a class="align-bottom" href="#">
-													example_link1
-													<i class="demo-icon icon-link-ext">&#xf08e;</i>
-												</a>&nbsp;&nbsp;
-												<a class="align-bottom" href="#">
-													example_link2
-													<i class="demo-icon icon-link-ext">&#xf08e;</i>
-												</a>
-											</div>
-
-										</div>
-									</div>
-
-									<div class="container-fluid border-left border-info border-3 my-3 ml-2 py-2">
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Method Signature</strong></i></span>
-											<div>
-												<h6 class="my-0"><a href="#">void</a> _ready ( )</h6>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Brief Description</strong></i></span>
-											<div>
-												<i>calls to _ready() as defined by Godot, setups initial variable values</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>See Also</strong></i></span>
-											<div>
-												<a href="#set_health">set_health</a>, <a href="#add_health">add_health</a>
-											</div>
-										</div>
-									</div>
-
-									<div class="container-fluid border-left border-info border-3 my-3 ml-2 py-2">
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Method Signature</strong></i></span>
-											<div>
-												<h6 class="my-0"><a href="#">void</a> _physics_process ( <a href="https://docs.godotengine.org/en/3.1/classes/class_float.html" target="_blank">float</a> delta )</h6>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Brief Description</strong></i></span>
-											<div>
-												<i>calls to _physics_process(delta) as defined by Godot, and also makes a call to move_and_slide as defined by Godot, specifically with the current @velocity</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Parameters</strong></i></span>
-											<div>
-												<i>delta - time step to smooth out frames</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Return Value</strong></i></span>
-											<div>
-												<i>nothing</i>
-											</div>
-										</div>
-									</div>
-
-									<div class="container-fluid border-left border-info border-3 my-3 ml-2 py-2">
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Method Signature</strong></i></span>
-											<div>
-												<h6 class="my-0"><a href="#">void</a> add_health ( <a href="https://docs.godotengine.org/en/3.1/classes/class_int.html" target="_blank">int</a> amount )</h6>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Brief Description</strong></i></span>
-											<div>
-												<i>adds the defined amount of health to the @health by calling down to @set_health</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Parameters</strong></i></span>
-											<div>
-												<i>amount - amount of health to add (can be negative to hurt the humanoid and will signal @humanoid_hurt if it is)</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Return Value</strong></i></span>
-											<div>
-												<i>nothing</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>See Also</strong></i></span>
-											<div>
-												<a href="#set_health">set_health</a>
-											</div>
-										</div>
-									</div>
-
-									<div class="container-fluid border-left border-info border-3 my-3 ml-2 py-2">
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Method Signature</strong></i></span>
-											<div>
-												<h6 class="my-0"><a href="#">void</a> set_health ( <a href="https://docs.godotengine.org/en/3.1/classes/class_int.html" target="_blank">int</a> amount )</h6>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Brief Description</strong></i></span>
-											<div>
-												<i>sets the health to the defined amount always ensuring it is less than @health_max, and if it does drop below 0, resets to 0 and signals that the humanoid has died via a call to _process_health</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Parameters</strong></i></span>
-											<div>
-												<i>amount - amount of health set on the humanoid (clamped between 0 and @health_max)</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Return Value</strong></i></span>
-											<div>
-												<i>nothing</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>See Also</strong></i></span>
-											<div>
-												<a href="#add_health">add_health</a>, <a href="#_process_health">_process_health</a>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Example Fragment</strong></i></span>
-											<div class="border-left border-3 border-dark p-2 my-2">
-												<code style="color: purple;">
-													<span class="indent-0">var Humanoid = preload('res://assets/entities/_base/humanoid.gd')</span><br>
-													<span class="indent-0">var humanoid = null</span><br><br>
-													<span class="indent-0">if humanoid != null:</span><br>
-													<span class="indent-1">humanoid = Humanoid.new()</span><br>
-													<span class="indent-1">humanoid.connect('humanoid_died', self, 'died_callback')</span><br>
-													<span class="indent-1">humanoid.set_health(-20) # Do damage to the humanoid</span>
-												</code>
-											</div>
-										</div>
-									</div>
-
-									<div class="container-fluid border-left border-info border-3 my-3 ml-2 py-2">
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Method Signature</strong></i></span>
-											<div>
-												<h6 class="my-0"><a href="#">void</a> _process_health ( )</h6>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Brief Description</strong></i></span>
-											<div>
-												<i>processing step that tests if @health is equal to 0 and, provided the humanoid is not already dead, sets the state of @is_dead to true and calls the signals @humanoid_died</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Return Value</strong></i></span>
-											<div>
-												<i>nothing</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>See Also</strong></i></span>
-											<div>
-												<a href="#set_health">set_health</a>, <a href="#add_health">add_health</a>
-											</div>
-										</div>
-										<div class="row ml-2 mt-4 mb-2 text-center">
-											<div class="ml-2 d-flex text-white">
-												<div class="widget text-sizing-1 px-2 bg-warning rounded-left mx-0"><i class="demo-icon icon-attention">&#xe801;</i> warning</div>
-												<div class="widget text-sizing-1 px-2 bg-dark rounded-right mx-0">must take care of queue_free() in parent script as the humanoid does not remove itself from the tree</div>
-											</div>
-										</div>
-									</div>
-
-									<div class="container-fluid border-left border-info border-3 my-3 ml-2 py-2">
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Method Signature</strong></i></span>
-											<div>
-												<h6 class="my-0"><a href="#">void</a> _on_humanoid_death ( )</h6>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Brief Description</strong></i></span>
-											<div>
-												<i>overridable method that gets called when the humanoid died, can be re-implemented to change any behaviour</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											<span class="special-2"><i><strong>Return Value</strong></i></span>
-											<div>
-												<i>nothing</i>
-											</div>
-										</div>
-										<div class="row ml-2 mt-4 mb-2 text-center">
-											<div class="ml-2 d-flex text-white">
-												<div class="widget text-sizing-1 px-2 bg-info rounded-left mx-0"><i class="demo-icon icon-attention-circle">&#xe802;</i> info</div>
-												<div class="widget text-sizing-1 px-2 bg-dark rounded-right mx-0">some kind of info message relating to script should be placed here</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>-->
 						</div>
-						<!--<div id="content-extended-data" class="container mt-4 mb-5">
-							<div class="row">
-								<h3 class="special-1">Additional Script Information</h3>
-								<table class="table table-sm mt-3">
-									<thead>
-										<tr>
-											<td><strong>TODOs</strong></td>
-											<td><strong></strong></td>
-										</tr>
-									</thead>
-									<tbody>
-										<tr>
-											<td>Here is a TODO with lots of TODO things that are here to be done when we are ready to do them, are you ready to do the TODO things?</td>
-											<td class="no-wrap">
-												<div class="d-flex">
-													<div class="d-flex text-white mt-2">
-														<div class="widget px-2 bg-success rounded-left mx-0">line</div>
-														<div class="widget px-2 bg-dark rounded-right mx-0">126</div>
-													</div>
-													<div class="d-flex text-white mt-2 ml-2">
-														<div class="widget px-2 bg-info rounded-left mx-0">owner</div>
-														<div class="widget px-2 bg-dark rounded-right mx-0">Jamie Massey</div>
-													</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td>There are more things to be done here and no time to lose!</td>
-											<td class="no-wrap">
-												<div class="d-flex">
-													<div class="d-flex text-white mt-2">
-														<div class="widget px-2 bg-success rounded-left mx-0">line</div>
-														<div class="widget px-2 bg-dark rounded-right mx-0">86</div>
-													</div>
-													<div class="d-flex text-white mt-2 ml-2">
-														<div class="widget px-2 bg-info rounded-left mx-0">owner</div>
-														<div class="widget px-2 bg-dark rounded-right mx-0">Jamie Massey</div>
-													</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td>This is an anonymous TODO that has been assigned no owner, what will we ever do?!</td>
-											<td class="no-wrap">
-												<div class="d-flex">
-													<div class="d-flex text-white mt-2">
-														<div class="widget px-2 bg-success rounded-left mx-0">line</div>
-														<div class="widget px-2 bg-dark rounded-right mx-0">1560</div>
-													</div>
-												</div>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-
-							<h6>@roadmap Information Cards</h6>
-						</div>-->
 					</div>
 				</div>
 			</div>
 		</div>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha512-bnIvzh6FU75ZKxp0GXLH9bewza/OIw6dLVh9ICg0gogclmYGguQJWl8U30WpbsGTqbIiAwxTsbe76DErLq5EDQ==" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.6.0/umd/popper.min.js" integrity="sha512-BmM0/BQlqh02wuK5Gz9yrbe7VyIVwOzD1o40yi1IsTjriX/NGF37NyXHfmFzIlMmoSIBXgqDiG1VNU6kB5dBbA==" crossorigin="anonymous"></script>
-		<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
 	</body>
 </html>

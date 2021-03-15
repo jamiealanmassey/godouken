@@ -5,3 +5,4 @@ Import('env_modules')
 
 env_godouken = env_modules.Clone()
 env_godouken.add_source_files(env.modules_sources, "*.cpp")
+env_godouken.add_source_files(env.modules_sources, "godouken_tests/*.cpp")

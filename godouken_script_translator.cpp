@@ -10,18 +10,60 @@
 GodoukenScriptTranslatorMemberData::GodoukenScriptTranslatorMemberData() {}
 GodoukenScriptTranslatorMemberData::~GodoukenScriptTranslatorMemberData() {}
 
+/// GodoukenScriptTranslatorPropertyData
+GodoukenScriptTranslatorPropertyData::GodoukenScriptTranslatorPropertyData() {}
+GodoukenScriptTranslatorPropertyData::~GodoukenScriptTranslatorPropertyData() {}
+
+/// GodoukenScriptTranslatorMethodData
+GodoukenScriptTranslatorMethodData::GodoukenScriptTranslatorMethodData() {}
+GodoukenScriptTranslatorMethodData::~GodoukenScriptTranslatorMethodData() {}
+
 /// GodoukenScriptTranslatorCommentParser
-void GodoukenScriptTranslatorCommentParser::parse(const List<String>& p_lines, const int32_t& p_from, const int32_t& p_to) {
+GodoukenScriptTranslatorCommentData::GodoukenScriptTranslatorCommentData() {
+	comment_body = "";
+	comment_selector = "";
+}
+
+GodoukenScriptTranslatorCommentData::GodoukenScriptTranslatorCommentData(const GodoukenScriptTranslatorCommentData &p_comment_data) {
+	comment_body = p_comment_data.comment_body;
+	comment_selector = p_comment_data.comment_selector;
+}
+
+GodoukenScriptTranslatorCommentData::GodoukenScriptTranslatorCommentData(const String &p_comment_body, const String &p_comment_selector) {
+	comment_body = p_comment_body;
+	comment_selector = p_comment_selector;
+}
+
+void GodoukenScriptTranslatorCommentParser::parse(const Vector<String> &p_lines, const int32_t &p_from, const int32_t &p_to) {
 	int index = 0;
-	for (const List<String>::Element *E = p_lines.front(); E; E->next()) {
+	for (int32_t i = 0; i < p_lines.size(); i++) {
 		if (index >= p_from) {
-			const String &line = E->get();
+			String comment_keyword = "";
+			String comment_content = "";
+			String comment_selector = "";
+
+			const String &line = p_lines[i];
 			const int32_t find_at = line.find("@");
 			const int32_t find_sep = line.find(":", find_at);
 			if (find_at > 0 && find_sep > 0) {
-				const String &keyword = line.substr(find_at, find_sep - find_at).strip_edges();
-				const String &content = line.substr(find_sep).strip_edges();
-				comment_entries[keyword] = content;
+				comment_keyword = line.substr(find_at, find_sep - find_at).strip_edges();
+				comment_content = line.substr(find_sep + 1).strip_edges();
+
+				const int32_t brace_0 = line.find_char('[', find_at);
+				const int32_t brace_1 = line.find_char(']', brace_0);
+				if (brace_0 > 0 && brace_1 > 0) {
+					comment_selector = line.substr(brace_1 - brace_0).strip_edges();
+				}
+
+				GodoukenScriptTranslatorCommentData *comment_data = memnew(GodoukenScriptTranslatorCommentData);
+				comment_data->comment_body = comment_content;
+				comment_data->comment_selector = comment_selector;
+
+				if (!comment_entries.has(comment_keyword)) {
+					comment_entries[comment_keyword] = CommentDataSet();
+				}
+
+				comment_entries[comment_keyword].push_back(comment_data);
 			}
 		}
 
@@ -32,7 +74,7 @@ void GodoukenScriptTranslatorCommentParser::parse(const List<String>& p_lines, c
 	}
 }
 
-void GodoukenScriptTranslatorCommentParser::parse(const List<String> &p_lines) {
+void GodoukenScriptTranslatorCommentParser::parse(const Vector<String> &p_lines) {
 	parse(p_lines, 0, p_lines.size());
 }
 
@@ -40,20 +82,29 @@ void GodoukenScriptTranslatorCommentParser::flush() {
 	comment_entries.clear();
 }
 
-const Dictionary &GodoukenScriptTranslatorCommentParser::get_comment_entires() const {
+const CommentDataStore &GodoukenScriptTranslatorCommentParser::get_data_store() const {
 	return comment_entries;
 }
 
-const bool GodoukenScriptTranslatorCommentParser::has_parsed_entry(const String &p_key) const {
+const CommentDataSet &GodoukenScriptTranslatorCommentParser::get_data_set(const String &p_key) const {
+	if (comment_entries.has(p_key)) {
+		return comment_entries[p_key];
+	}
+
+	return CommentDataSet_0;
+}
+
+const bool GodoukenScriptTranslatorCommentParser::has_data_set(const String &p_key) const {
 	return comment_entries.has(p_key);
 }
 
-const String &GodoukenScriptTranslatorCommentParser::get_parsed_entry(const String &p_key, const bool p_remove_element) {
-	String result = "";
+const GodoukenScriptTranslatorCommentData *GodoukenScriptTranslatorCommentParser::get_data_set_first(const String &p_key/*, const bool p_remove_element*/) {
+	GodoukenScriptTranslatorCommentData *result = memnew(GodoukenScriptTranslatorCommentData);
 	if (comment_entries.has(p_key)) {
-		result = comment_entries[p_key];
-		if (p_remove_element) {
-			comment_entries.erase(p_key);
+		const CommentDataSet &comment_data_set = comment_entries[p_key];
+		if (comment_data_set.size() > 0) {
+			memdelete(result);
+			result = comment_data_set[0];
 		}
 	}
 
@@ -63,345 +114,39 @@ const String &GodoukenScriptTranslatorCommentParser::get_parsed_entry(const Stri
 GodoukenScriptTranslatorCommentParser::GodoukenScriptTranslatorCommentParser() {}
 GodoukenScriptTranslatorCommentParser::~GodoukenScriptTranslatorCommentParser() {}
 
-/// GodoukenScriptTranslator
-const Dictionary GodoukenScriptTranslator::get_members_to_line(const Ref<Script> &p_script) {
-    Dictionary members_to_line = Dictionary();
-	return members_to_line;
-}
-
-const Array &GodoukenScriptTranslator::get_sorted_keys(Array &p_keys) {
-	if (p_keys.size() <= 1) {
-		return p_keys;
-	}
-
-	Array keys_sorted = Array();
-	Variant *keys_pure = new Variant[p_keys.size()];
-	for (int32_t i = 0; i < p_keys.size(); i++) {
-		int index = translator_script->get_member_line(keys_pure[i]);
-		int j = i;
-
-		while (j > 0 && translator_script->get_member_line(keys_pure[i - 1]) > index) {
-			keys_pure[j] = keys_pure[j - 1];
-			j--;
-		}
-
-		keys_pure[j] = index;
-	}
-
-	for (int32_t i = 0; i < p_keys.size(); i++) {
-		keys_sorted.push_back(Variant(keys_pure[i]));
-	}
-
-	p_keys = keys_sorted;
-	return p_keys;
-}
-
-const List<String> GodoukenScriptTranslator::get_script_lines(const FileAccess *p_script_file) {
-	List<String> script_lines;
-	String script_line = p_script_file->get_line();
-	while (!(script_line = p_script_file->get_line()).empty()) {
-		script_lines.push_back(script_line);
-	}
-
-	return script_lines;
-}
-
-const int32_t GodoukenScriptTranslator::get_script_line_begin(const List<String> &p_script_lines) {
-	int32_t index = 0;
-	for (const List<String>::Element *E = p_script_lines.front(); E; E = E->next()) {
-		if (E->get().find("extends") >= 0) {
-			return index;
-		}
-	}
-
-	return -1;
-}
-
-const GodoukenDataNodeMeta GodoukenScriptTranslator::get_meta_data() const {
-    GodoukenDataNodeMeta temp(0.0f, 0.0f, "", "", "");
-    return temp;
-}
-
-void GodoukenScriptTranslator::evaluate_member(const String &p_member_name) {
-	if (script_members_to_line.has(p_member_name)) {
-		translator_script_line_begin = translator_script->get_member_line(p_member_name);
-
-		Object *script_member_obj = script_members_to_line[p_member_name];
-		GodoukenScriptTranslatorMemberData *script_member_data = (GodoukenScriptTranslatorMemberData *)script_member_obj;
-		if (script_member_data->member_type == 0) {
-
-		} else if (script_member_data->member_type == 1) {
-			MethodInfo method_info = translator_script->get_method_info(p_member_name);
-			GodoukenDataNodeMethod method_data;
-			GodoukenScriptTranslatorCommentParser *comment_data_parser = memnew(GodoukenScriptTranslatorCommentParser);
-			comment_data_parser->parse(translator_script_lines, translator_script_line_begin, translator_script_line_end);
-			method_data.method_is_godot = reserved_godot_methods.find(method_info.name);
-			method_data.method_is_internal = method_info.name[0] == '_';
-			method_data.node_name = method_info.name;
-			method_data.node_desc_brief = comment_data_parser->get_parsed_entry("brief", true);
-			method_data.node_desc_detailed = comment_data_parser->get_parsed_entry("detailed", true);
-			method_data.node_extra_warning = comment_data_parser->get_parsed_entry("warning", true);
-			method_data.node_extra_info = comment_data_parser->get_parsed_entry("info", true);
-			method_data.method_return_msg = comment_data_parser->get_parsed_entry("return", true);
-			method_data.method_see_also = comment_data_parser->get_parsed_entry("see", true).split(",");
-			method_data.node_return_type = GodoukenDataType(false, method_info.return_val.class_name);
-
-			const Dictionary &comment_entries = comment_data_parser->get_comment_entires();
-			const Array &comment_keys = comment_entries.keys();
-			for (int32_t i = 0; i < comment_keys.size(); i++) {
-				const String &comment_key = comment_keys[i];
-				const String &comment_val = comment_entries[comment_key];
-				if (comment_key.find("param") > 0) {
-					const int32_t brace_0 = comment_key.find_char('[');
-					const int32_t brace_1 = comment_key.find_char(']');
-					if (brace_0 >= 0 && brace_1 >= 0 && brace_0 != brace_1) {
-						GodoukenDataParameter method_parameter;
-						const List<PropertyInfo> method_args = method_info.arguments;
-						const String &property_name = comment_key.substr(brace_0, brace_1 - brace_0);
-						method_parameter.param_identifier = property_name;
-						method_parameter.param_desc = comment_val;
-						
-						for (int32_t i = 0; i < method_args.size(); i++) {
-							if (method_args[i].name.find(property_name) == 0) {
-								const PropertyInfo &property_info = method_args[i];
-								const String &property_type = String(property_info.class_name);
-								method_parameter.param_type_data = GodoukenDataType(reserved_godot_types.find(property_type), property_type);
-							}
-						}
-
-						method_data.method_params.push_back(method_parameter);
-					}
-				}
-			}
-		} else if (script_member_data->member_type == 2) {
-
-		}
-	}
-}
-
-GodoukenDataModel *GodoukenScriptTranslator::script_translate(const String &p_script_name, const String &p_script_directory) { 
-    Error *translator_script_status = nullptr;
-	FileAccess *translator_script_file = nullptr;
-	GodoukenDataModel *translator_data_model = nullptr;
-
-	translator_script_file = FileAccess::open(p_script_directory + p_script_name, FileAccess::READ, translator_script_status);
-	if (translator_script_status && (*translator_script_status) == Error::OK) {
-		translator_script->set_source_code(translator_script_file->get_as_utf8_string());
-
-		if (translator_script->is_valid()) {
-			translator_data_model = memnew(GodoukenDataModel);
-			List<MethodInfo> *translator_script_methods = nullptr;
-			List<MethodInfo> *translator_script_signals = nullptr;
-			List<PropertyInfo> *translator_script_properties = nullptr;
-
-			translator_script->get_script_method_list(translator_script_methods);
-			translator_script->get_script_signal_list(translator_script_signals);
-			translator_script->get_script_property_list(translator_script_properties);
-
-			int32_t index = 0;
-			for (index = 0; index < (*translator_script_properties).size(); index++) {
-				const PropertyInfo &property_info = (*translator_script_properties)[index];
-				const String &property_name = property_info.name;
-
-				GodoukenScriptTranslatorMemberData *member_data = memnew(GodoukenScriptTranslatorMemberData);
-				member_data->member_type = 0;
-				member_data->member_line = translator_script->get_member_line(property_name);
-				script_members_to_line[property_name] = member_data;
-			}
-
-			for (index = 0; index < (*translator_script_methods).size(); index++) {
-				const MethodInfo &method_info = (*translator_script_methods)[index];
-				const String &method_name = method_info.name;
-
-				GodoukenScriptTranslatorMemberData *member_data = memnew(GodoukenScriptTranslatorMemberData);
-				member_data->member_type = 1;
-				member_data->member_line = translator_script->get_member_line(method_name);
-				script_members_to_line[method_name] = member_data;
-			}
-
-			for (index = 0; index < (*translator_script_signals).size(); index++) {
-				const MethodInfo &signal_info = (*translator_script_signals)[index];
-				const String &signal_name = signal_info.name;
-
-				GodoukenScriptTranslatorMemberData *member_data = memnew(GodoukenScriptTranslatorMemberData);
-				member_data->member_type = 2;
-				member_data->member_line = translator_script->get_member_line(signal_name);
-				script_members_to_line[signal_name] = member_data;
-			}
-
-			// const Dictionary &members_to_line = get_members_to_line(translator_script);
-			const Array &members_to_keys = get_sorted_keys(script_members_to_line.keys());
-			translator_script_lines = get_script_lines(translator_script_file);
-			translator_script_line_begin = get_script_line_begin(translator_script_lines);
-		}
-	}
-
-    return translator_data_model;
-}
-
-#include "stencils/godouken_stencil_class.h"
-#include "stencils/godouken_stencil_bootstrap.h"
-#include "stencils/godouken_stencil_class_navbar.h"
-#include "stencils/godouken_stencil_style_shared.h"
-#include "stencils/godouken_stencil_style_class.h"
-
-GodoukenScriptTranslator::GodoukenScriptTranslator() :
-    translator_script(nullptr),
-    translator_script_line_begin(-1),
-    translator_script_line_end(-1) {
-    reserved_godot_methods.push_back("_init");
-    reserved_godot_methods.push_back("_ready");
-    reserved_godot_methods.push_back("_process");
-    reserved_godot_methods.push_back("_process_physics");
-    reserved_godot_methods.push_back("_enter_tree");
-    reserved_godot_methods.push_back("_exit_tree");
-    reserved_godot_types.push_back("bool");
-    reserved_godot_types.push_back("int");
-    reserved_godot_types.push_back("float");
-    reserved_godot_types.push_back("String");
-    reserved_godot_types.push_back("Vector2");
-    reserved_godot_types.push_back("Vector3");
-    reserved_godot_types.push_back("Rect2");
-    reserved_godot_types.push_back("Transform2D");
-    reserved_godot_types.push_back("Transform");
-    reserved_godot_types.push_back("Plane");
-    reserved_godot_types.push_back("Quat");
-    reserved_godot_types.push_back("AABB");
-    reserved_godot_types.push_back("Basis");
-    reserved_godot_types.push_back("Color");
-    reserved_godot_types.push_back("NodePath");
-    reserved_godot_types.push_back("RID");
-    reserved_godot_types.push_back("Object");
-    reserved_godot_types.push_back("Array");
-    reserved_godot_types.push_back("Dictionary");
-    reserved_godot_types.push_back("PoolByteArray");
-    reserved_godot_types.push_back("PoolIntArray");
-    reserved_godot_types.push_back("PoolRealArray");
-    reserved_godot_types.push_back("PoolStringArray");
-    reserved_godot_types.push_back("PoolVector2Array");
-    reserved_godot_types.push_back("PoolVector3Array");
-    reserved_godot_types.push_back("PoolColorArray");
-
-	nlohmann::json script;
-	nlohmann::json script_properties;
-	nlohmann::json script_properties_test1;
-	nlohmann::json script_properties_test2;
-	nlohmann::json styling_settings;
-
-	script_properties_test1["name"] = "Property1";
-	script_properties_test1["description"]["brief"] = "This is a short description";
-	script_properties_test1["description"]["detailed"] = "This is a detailed description";
-	script_properties_test1["type_info"]["name"] = "int";
-	script_properties_test1["type_info"]["href"] = "https://docs.godotengine.org/en/3.2/classes/class_int.html";
-	script_properties_test1["tags"]["is_godot"] = true;
-	script_properties_test1["tags"]["is_exported"] = false;
-
-	script_properties_test2["name"] = "Property2";
-	script_properties_test2["description"]["brief"] = "This is a short description";
-	script_properties_test2["description"]["detailed"] = "This is a detailed description";
-	script_properties_test2["type_info"]["name"] = "void";
-	script_properties_test2["type_info"]["href"] = nullptr;
-	script_properties_test2["tags"]["is_godot"] = false;
-	script_properties_test2["tags"]["is_exported"] = false;
-
-	script["data"]["project_title"] = "Test Project";
-	script["data"]["script"]["name"] = "TestScript";
-	script["data"]["script"]["meta"]["deprecated"] = nullptr;
-	script["data"]["script"]["meta"]["version"] = 1.0f;
-	script["data"]["script"]["meta"]["created"] = "04/02/2021";
-	script["data"]["script"]["meta"]["modified"] = nullptr;
-	script["data"]["script"]["meta"]["collection"] = nullptr;
-	script["data"]["script"]["description"]["brief"] = "This is a short description";
-	script["data"]["script"]["description"]["detailed"] = "This is a detailed description";
-
-	script["data"]["script"]["breadcrumbs"] = nlohmann::json::array();
-	script["data"]["script"]["breadcrumbs"].push_back("assets");
-	script["data"]["script"]["breadcrumbs"].push_back("entities");
-	script["data"]["script"]["breadcrumbs"].push_back("_base");
-	script["data"]["script"]["breadcrumbs"].push_back("TestScript.gd");
-
-	script["data"]["script"]["properties"] = nlohmann::json::array();
-	script["data"]["script"]["properties"].push_back(script_properties_test1);
-	script["data"]["script"]["properties"].push_back(script_properties_test2);
-
-	styling_settings["styling"]["colours"]["background"]["white"] = "#FFFFFF";
-	styling_settings["styling"]["colours"]["background"]["blue"] = "#179AEB";
-	styling_settings["styling"]["colours"]["background"]["red"] = "#C21D1D";
-	styling_settings["styling"]["colours"]["background"]["green"] = "#1DC254";
-	styling_settings["styling"]["colours"]["background"]["yellow"] = "#E3E34B";
-	styling_settings["styling"]["colours"]["background"]["orange"] = "#EBA626";
-
-	styling_settings["styling"]["colours"]["text"]["white"] = "#FFFFFF";
-	styling_settings["styling"]["colours"]["text"]["blue"] = "#179AEB";
-	styling_settings["styling"]["colours"]["text"]["red"] = "#C21D1D";
-	styling_settings["styling"]["colours"]["text"]["green"] = "#1DC254";
-	styling_settings["styling"]["colours"]["text"]["yellow"] = "#E3E34B";
-	styling_settings["styling"]["colours"]["text"]["orange"] = "#EBA626";
-
-	inja::Environment environment_html { "./godouken/html/" };
-	inja::Environment environment_css { "./godouken/css/" };
-	inja::Environment environment_js{ "./godouken/js/" };
-
-	inja::Template template_html_class = environment_html.parse(godouken_stencil_class);
-	inja::Template template_html_class_navbar = environment_html.parse(godouken_stencil_class_navbar);
-	inja::Template template_css_shared = environment_css.parse(godouken_stencil_style_shared);
-	inja::Template template_css_class = environment_css.parse(godouken_stencil_style_class);
-
-	environment_html.write(template_html_class, script, "class_test.html");
-	environment_html.write(template_html_class_navbar, nullptr, "class_navigation.html");
-	environment_css.write(template_css_shared, styling_settings, "style_shared.css");
-	environment_css.write(template_css_class, nullptr, "style_class.css");
-}
-
-GodoukenScriptTranslator::~GodoukenScriptTranslator() {
-    if (translator_script) {
-        memdelete(translator_script);
-    }
-
-    translator_script_lines.clear();
-	translator_script_lines.clear();
-    reserved_godot_methods.clear();
-    reserved_godot_types.clear();
-}
-
-
-
-
-
-
-const Dictionary GodoukenTranslatorV2::get_members_to_line(const Ref<Script> &p_script) {
+const Dictionary GodoukenTranslator::get_members_to_line(const Ref<Script> &p_script) {
 	Dictionary members_to_line = Dictionary();
 	return members_to_line;
 }
 
-const Array &GodoukenTranslatorV2::get_sorted_keys(Array &p_keys) {
+const Array &GodoukenTranslator::get_sorted_keys(Array &p_keys) const {
 	if (p_keys.size() <= 1) {
 		return p_keys;
 	}
 
-	Array keys_sorted = Array();
-	Variant *keys_pure = new Variant[p_keys.size()];
-	for (int32_t i = 0; i < p_keys.size(); i++) {
-		int index = script->get_member_line(keys_pure[i]);
-		int j = i;
-
-		while (j > 0 && script->get_member_line(keys_pure[i - 1]) > index) {
-			keys_pure[j] = keys_pure[j - 1];
-			j--;
+	int32_t i = 0;
+	int32_t j = 0;
+	int32_t min_idx = 0;
+	for (i = 0; i < p_keys.size() - 1; i++)
+	{ 
+		min_idx = i;
+		for (j = i + 1; j < p_keys.size(); j++) {
+			const int32_t key_1 = script->get_member_line(p_keys[j]);
+			const int32_t key_2 = script->get_member_line(p_keys[min_idx]);
+			if (key_1 < key_2) {
+				min_idx = j;
+			}
 		}
 
-		keys_pure[j] = index;
+		const Variant temp = p_keys[min_idx];
+		p_keys[min_idx] = p_keys[i];
+		p_keys[i] = temp;
 	}
-
-	for (int32_t i = 0; i < p_keys.size(); i++) {
-		keys_sorted.push_back(Variant(keys_pure[i]));
-	}
-
-	p_keys = keys_sorted;
+	
 	return p_keys;
 }
 
-const List<String> GodoukenTranslatorV2::get_script_lines(const FileAccess *p_script_file) {
+List<String> GodoukenTranslator::get_script_lines(const FileAccess *p_script_file) {
 	List<String> script_lines;
 	String script_line = p_script_file->get_line();
 	while (!(script_line = p_script_file->get_line()).empty()) {
@@ -411,190 +156,262 @@ const List<String> GodoukenTranslatorV2::get_script_lines(const FileAccess *p_sc
 	return script_lines;
 }
 
-const int32_t GodoukenTranslatorV2::get_script_line_begin(const List<String> &p_script_lines) {
-	int32_t index = 0;
-	for (const List<String>::Element *E = p_script_lines.front(); E; E = E->next()) {
-		if (E->get().find("extends") >= 0) {
-			return index;
+int32_t GodoukenTranslator::get_script_line_begin(const Vector<String> &p_script_lines) {
+	int32_t index = -1;
+	for (int32_t i = 0; i < p_script_lines.size(); i++) {
+		if (p_script_lines[i].find("extends") >= 0) {
+			index = i;
+			break;
 		}
 	}
 
-	return -1;
+	return index;
 }
 
-nlohmann::json &GodoukenTranslatorV2::evaluate_property(const PropertyInfo &p_property_info) {
+void GodoukenTranslator::get_type_info(String &p_type_name, String &p_type_href, bool &p_type_is_godot, const PropertyInfo &p_property_info) {
+	StringBuilder type_builder = StringBuilder();
+	p_type_name = Variant::get_type_name(p_property_info.type).to_lower();
+	p_type_is_godot = p_property_info.type != Variant::NIL && p_property_info.type != Variant::OBJECT;
+	if (p_type_is_godot) {
+		type_builder += "https://docs.godotengine.org/en/stable/classes/class_";
+		type_builder += p_type_name;
+		type_builder += ".html";
+	}
+
+	p_type_href = type_builder.as_string();
+}
+
+void GodoukenTranslator::populate(nlohmann::json &p_script_json) {
+	p_script_json["data"]["script"]["name"] = "";
+	p_script_json["data"]["script"]["description"]["brief"] = "";
+	p_script_json["data"]["script"]["description"]["detailed"] = "";
+	p_script_json["data"]["script"]["meta"]["deprecated"] = "";
+	p_script_json["data"]["script"]["meta"]["version"] = "";
+	p_script_json["data"]["script"]["meta"]["created"] = "";
+	p_script_json["data"]["script"]["meta"]["modified"] = "";
+	p_script_json["data"]["script"]["meta"]["collection"] = "";
+	p_script_json["data"]["script"]["meta"]["author"] = "";
+	p_script_json["data"]["script"]["properties"] = nlohmann::json::array();
+	p_script_json["data"]["script"]["methods"] = nlohmann::json::array();
+	p_script_json["data"]["script"]["signals"] = nlohmann::json::array();
+}
+
+void GodoukenTranslator::evaluate_signal(nlohmann::json &p_script_json, const MethodInfo &p_signal_info) const {
 	GodoukenScriptTranslatorCommentParser *comment_parser = memnew(GodoukenScriptTranslatorCommentParser);
 	comment_parser->parse(script_lines, script_line_begin, script_line_finish);
 
-	nlohmann::json property_json = nlohmann::json::object();
-	property_json["name"] = p_property_info.name.utf8();
-	property_json["description"]["brief"] = "This is a short description";
-	property_json["description"]["detailed"] = "This is a detailed description";
-	property_json["type_info"]["name"] = "int";
-	property_json["type_info"]["href"] = "https://docs.godotengine.org/en/3.2/classes/class_int.html";
-	property_json["tags"]["is_godot"] = true;
-	property_json["tags"]["is_exported"] = false;
-	return property_json;
+	nlohmann::json signal_json = nlohmann::json::object();
+	signal_json["name"] = p_signal_info.name.utf8();
+	p_script_json["data"]["script"]["signals"].push_back(signal_json);
 }
 
-void GodoukenTranslatorV2::evaluate_member(const String& p_member_name) {
-	if (script_members_to_line.has(p_member_name)) {
-		script_line_begin = script->get_member_line(p_member_name);
+void GodoukenTranslator::evaluate_method(nlohmann::json &p_script_json, const MethodInfo &p_method_info) const {
+	GodoukenScriptTranslatorCommentParser *comment_parser = memnew(GodoukenScriptTranslatorCommentParser);
+	comment_parser->parse(script_lines, script_line_begin, script_line_finish);
 
-		Object *script_member_obj = script_members_to_line[p_member_name];
-		GodoukenScriptTranslatorMemberData *script_member_data = (GodoukenScriptTranslatorMemberData *)script_member_obj;
-		if (script_member_data->member_type == 0) {
+	bool is_virtual = (p_method_info.flags & METHOD_FLAG_VIRTUAL) == METHOD_FLAG_VIRTUAL;
+	bool type_is_godot = false;
+	String type_name = "";
+	String type_href = "";
+	get_type_info(type_name, type_href, type_is_godot, p_method_info.return_val);
+	
+	nlohmann::json method_json = nlohmann::json::object();
+	method_json["name"] = p_method_info.name.utf8();
+	method_json["description"]["brief"] = comment_parser->get_data_set_first("@brief")->comment_body.utf8();
+	method_json["description"]["detailed"] = comment_parser->get_data_set_first("@detailed")->comment_body.utf8();
+	method_json["tags"]["is_godot"] = false;
+	method_json["tags"]["is_internal"] = false;
+	method_json["tags"]["is_overrider"] = is_virtual;
+	method_json["tags"]["cl_overrider"] = false;
+	method_json["extra"]["warning"] = comment_parser->get_data_set_first("@warning")->comment_body.utf8();
+	method_json["extra"]["info"] = comment_parser->get_data_set_first("@info")->comment_body.utf8();
 
-		} else if (script_member_data->member_type == 1) {
-			MethodInfo method_info = script->get_method_info(p_member_name);
-			GodoukenDataNodeMethod method_data;
-			GodoukenScriptTranslatorCommentParser *comment_data_parser = memnew(GodoukenScriptTranslatorCommentParser);
-			comment_data_parser->parse(script_lines, script_line_begin, script_line_finish);
-			method_data.method_is_godot = script_reserved_godot_methods.find(method_info.name);
-			method_data.method_is_internal = method_info.name[0] == '_';
-			method_data.node_name = method_info.name;
-			method_data.node_desc_brief = comment_data_parser->get_parsed_entry("brief", true);
-			method_data.node_desc_detailed = comment_data_parser->get_parsed_entry("detailed", true);
-			method_data.node_extra_warning = comment_data_parser->get_parsed_entry("warning", true);
-			method_data.node_extra_info = comment_data_parser->get_parsed_entry("info", true);
-			method_data.method_return_msg = comment_data_parser->get_parsed_entry("return", true);
-			method_data.method_see_also = comment_data_parser->get_parsed_entry("see", true).split(",");
-			method_data.node_return_type = GodoukenDataType(false, method_info.return_val.class_name);
+	method_json["return"]["description"] = comment_parser->get_data_set_first("@return")->comment_body.utf8();
+	method_json["return"]["type_info"]["name"] = "";
+	method_json["return"]["type_info"]["href"] = "";
+	
+	const CommentDataSet &comment_args_set = comment_parser->get_data_set("@parameter");
+	for (int32_t x = 0; x < p_method_info.arguments.size(); x++) {
+		const PropertyInfo &property_info = p_method_info.arguments[x];
+		String type_arg_name = "";
+		String type_arg_href = "";
+		bool type_arg_is_godot = false;
+		get_type_info(type_arg_name, type_arg_href, type_arg_is_godot, property_info);
+		
+		nlohmann::json method_parameter_json = nlohmann::json::object();
+		method_parameter_json["name"] = property_info.name.utf8();
+		method_parameter_json["description"] = "";
+		method_parameter_json["type_info"]["name"] = type_arg_name.utf8();
+		method_parameter_json["type_info"]["href"] = type_arg_href.utf8();
 
-			const Dictionary &comment_entries = comment_data_parser->get_comment_entires();
-			const Array &comment_keys = comment_entries.keys();
-			for (int32_t i = 0; i < comment_keys.size(); i++) {
-				const String &comment_key = comment_keys[i];
-				const String &comment_val = comment_entries[comment_key];
-				if (comment_key.find("param") > 0) {
-					const int32_t brace_0 = comment_key.find_char('[');
-					const int32_t brace_1 = comment_key.find_char(']');
-					if (brace_0 >= 0 && brace_1 >= 0 && brace_0 != brace_1) {
-						GodoukenDataParameter method_parameter;
-						const List<PropertyInfo> method_args = method_info.arguments;
-						const String &property_name = comment_key.substr(brace_0, brace_1 - brace_0);
-						method_parameter.param_identifier = property_name;
-						method_parameter.param_desc = comment_val;
-
-						for (int32_t i = 0; i < method_args.size(); i++) {
-							if (method_args[i].name.find(property_name) == 0) {
-								const PropertyInfo &property_info = method_args[i];
-								const String &property_type = String(property_info.class_name);
-								method_parameter.param_type_data = GodoukenDataType(script_reserved_godot_types.find(property_type), property_type);
-							}
-						}
-
-						method_data.method_params.push_back(method_parameter);
-					}
-				}
+		for (int32_t i = 0; i < comment_args_set.size(); i++) {
+			if (p_method_info.arguments[x].name.find(comment_args_set[i]->comment_selector) == 0) {
+				method_parameter_json["description"] = comment_args_set[i]->comment_body.utf8();
+				break;
 			}
-		} else if (script_member_data->member_type == 2) {
 		}
 
-		script_line_finish = script_line_begin;
+		method_json["parameters"].push_back(method_parameter_json);
+	}
+
+	const CommentDataSet &comment_also_set = comment_parser->get_data_set("@see");
+	for (int32_t i = 0; i < comment_also_set.size(); i++) {
+		method_json["see"].push_back(comment_also_set[i]->comment_body.utf8());
+	}
+
+	p_script_json["data"]["script"]["methods"].push_back(method_json);
+}
+
+void GodoukenTranslator::evaluate_property(nlohmann::json &p_script_json, const PropertyInfo &p_property_info) const {
+	GodoukenScriptTranslatorCommentParser *comment_parser = memnew(GodoukenScriptTranslatorCommentParser);
+	comment_parser->parse(script_lines, script_line_begin, script_line_finish);
+
+	bool type_is_exported = (p_property_info.usage & PROPERTY_USAGE_EDITOR) == PROPERTY_USAGE_EDITOR;
+	bool type_is_godot = false;
+	String type_name = "";
+	String type_href = "";
+	get_type_info(type_name, type_href, type_is_godot, p_property_info);
+	
+	nlohmann::json property_json = nlohmann::json::object();
+	property_json["name"] = p_property_info.name.utf8();
+	property_json["description"]["brief"] = comment_parser->get_data_set_first("@brief")->comment_body.utf8();
+	property_json["description"]["detailed"] = comment_parser->get_data_set_first("@detailed")->comment_body.utf8();
+	property_json["type_info"]["name"] = type_name.utf8();
+	property_json["type_info"]["href"] = type_href.utf8();
+	property_json["tags"]["is_godot"] = type_is_godot;
+	property_json["tags"]["is_exported"] = type_is_exported;
+	p_script_json["data"]["script"]["properties"].push_back(property_json);
+}
+
+void GodoukenTranslator::evaluate_script(nlohmann::json &p_script_json, const Array &p_members_to_keys) {
+	GodoukenScriptTranslatorCommentParser *comment_parser = memnew(GodoukenScriptTranslatorCommentParser);
+	comment_parser->parse(script_lines, 0, script_line_begin);
+	p_script_json["data"]["script"]["name"] = comment_parser->get_data_set_first("@name")->comment_body.utf8();
+	p_script_json["data"]["script"]["description"]["brief"] = comment_parser->get_data_set_first("@brief")->comment_body.utf8();
+	p_script_json["data"]["script"]["description"]["detailed"] = comment_parser->get_data_set_first("@detailed")->comment_body.utf8();
+	p_script_json["data"]["script"]["meta"]["deprecated"] = comment_parser->get_data_set_first("@deprecated")->comment_body.utf8();
+	p_script_json["data"]["script"]["meta"]["version"] = comment_parser->get_data_set_first("@version")->comment_body.to_float();
+	p_script_json["data"]["script"]["meta"]["created"] = comment_parser->get_data_set_first("@created")->comment_body.utf8();
+	p_script_json["data"]["script"]["meta"]["modified"] = comment_parser->get_data_set_first("@modified")->comment_body.utf8();
+	p_script_json["data"]["script"]["meta"]["collection"] = comment_parser->get_data_set_first("@collection")->comment_body.utf8();
+	p_script_json["data"]["script"]["meta"]["author"] = comment_parser->get_data_set_first("@author")->comment_body.utf8();
+
+	for (int32_t i = 0; i < p_members_to_keys.size(); i++) {
+		const String &member_name = p_members_to_keys.get(i);
+		Object *member_data_ptr = script_members_to_line[member_name];
+		const GodoukenScriptTranslatorMemberData *member_data = dynamic_cast<GodoukenScriptTranslatorMemberData *>(member_data_ptr);
+		if (member_data) {
+			script_line_finish = member_data->member_line;
+			switch (member_data->member_type) {
+				case 0:
+					evaluate_property(p_script_json, (dynamic_cast<const GodoukenScriptTranslatorPropertyData *>(member_data))->member_property_info);
+					break;
+				case 1:
+					evaluate_method(p_script_json, (dynamic_cast<const GodoukenScriptTranslatorMethodData *>(member_data))->member_method_info);
+					break;
+				case 2:
+					evaluate_signal(p_script_json, (dynamic_cast<const GodoukenScriptTranslatorMethodData *>(member_data))->member_method_info);
+					break;
+				default:
+					break;
+			}
+		}
+
+		script_line_begin = script_line_finish;
 	}
 }
 
-nlohmann::json& GodoukenTranslatorV2::evaluate(const String& p_script_name, const String& p_script_directory) {
-	nlohmann::json translator_data = nlohmann::json::object();
-	Error *script_status = nullptr;
-	FileAccess *script_file = nullptr;
-	//GodoukenDataModel *translator_data_model = nullptr;
+void GodoukenTranslator::evaluate(nlohmann::json &p_script_json, const String &p_code) {
+	GodoukenTranslator::populate(p_script_json);
+	script = memnew(GDScript);
+	script->set_source_code(p_code);
+	script->reload(true);
+	if (script->is_valid()) {
+		List<MethodInfo> *script_methods = new List<MethodInfo>();
+		List<MethodInfo> *script_signals = new List<MethodInfo>();
+		List<PropertyInfo> *script_properties = new List<PropertyInfo>();
 
-	script_file = FileAccess::open(p_script_directory + p_script_name, FileAccess::READ, script_status);
-	if (script_status && (*script_status) == Error::OK) {
-		script->set_source_code(script_file->get_as_utf8_string());
+		script->get_script_method_list(script_methods);
+		script->get_script_signal_list(script_signals);
+		script->get_script_property_list(script_properties);
 
-		if (script->is_valid()) {
-			//data_model = memnew(GodoukenDataModel);
-			List<MethodInfo> *script_methods = nullptr;
-			List<MethodInfo> *script_signals = nullptr;
-			List<PropertyInfo> *script_properties = nullptr;
-
-			script->get_script_method_list(script_methods);
-			script->get_script_signal_list(script_signals);
-			script->get_script_property_list(script_properties);
-
-			int32_t index = 0;
-			for (index = 0; index < (*script_properties).size(); index++) {
+		int32_t index = 0;
+		if (script_properties) {
+			for (index = 0; index < script_properties->size(); index++) {
+				GodoukenScriptTranslatorPropertyData *member_data = memnew(GodoukenScriptTranslatorPropertyData);
 				const PropertyInfo &property_info = (*script_properties)[index];
 				const String &property_name = property_info.name;
 
-				GodoukenScriptTranslatorMemberData *member_data = memnew(GodoukenScriptTranslatorMemberData);
 				member_data->member_type = 0;
 				member_data->member_line = script->get_member_line(property_name);
-				script_members_to_line[property_name] = member_data;
+				member_data->member_property_info = property_info;
+				if (member_data->member_line < 4294967295) {
+					script_members_to_line[property_name] = member_data;
+				}
 			}
+		}
 
-			for (index = 0; index < (*script_methods).size(); index++) {
+		if (script_methods) {
+			for (index = 0; index < script_methods->size(); index++) {
+				GodoukenScriptTranslatorMethodData *member_data = memnew(GodoukenScriptTranslatorMethodData);
 				const MethodInfo &method_info = (*script_methods)[index];
 				const String &method_name = method_info.name;
 
-				GodoukenScriptTranslatorMemberData *member_data = memnew(GodoukenScriptTranslatorMemberData);
 				member_data->member_type = 1;
 				member_data->member_line = script->get_member_line(method_name);
-				script_members_to_line[method_name] = member_data;
+				member_data->member_method_info = method_info;
+				if (member_data->member_line < 4294967295) {
+					script_members_to_line[method_name] = member_data;
+				}
 			}
+		}
 
-			for (index = 0; index < (*script_signals).size(); index++) {
+		if (script_signals) {
+			for (index = 0; index < script_signals->size(); index++) {
+				GodoukenScriptTranslatorMethodData *member_data = memnew(GodoukenScriptTranslatorMethodData);
 				const MethodInfo &signal_info = (*script_signals)[index];
 				const String &signal_name = signal_info.name;
 
-				GodoukenScriptTranslatorMemberData *member_data = memnew(GodoukenScriptTranslatorMemberData);
 				member_data->member_type = 2;
 				member_data->member_line = script->get_member_line(signal_name);
-				script_members_to_line[signal_name] = member_data;
+				member_data->member_method_info = signal_info;
+				if (member_data->member_line < 4294967295) {
+					script_members_to_line[signal_name] = member_data;
+				}
 			}
-
-			// const Dictionary &members_to_line = get_members_to_line(translator_script);
-			const Array &members_to_keys = get_sorted_keys(script_members_to_line.keys());
-			script_lines = get_script_lines(script_file);
-			script_line_begin = get_script_line_begin(script_lines);
 		}
-	}
 
-	return translator_data;
+		Set<StringName> *members = new Set<StringName>();
+		script->get_members(members);
+		
+		const Array members_to_keys = get_sorted_keys(script_members_to_line.keys());
+		script_lines = p_code.split("\n");
+		script_line_begin = get_script_line_begin(script_lines);
+		evaluate_script(p_script_json, members_to_keys);
+	}
 }
 
-GodoukenTranslatorV2::GodoukenTranslatorV2() {
-	script = nullptr;
-	script_line_begin = -1;
-	script_line_finish = -1;
+void GodoukenTranslator::evaluate(nlohmann::json &p_script_json, const String& p_script_name, const String& p_script_directory) {
+	Error script_status;
+	FileAccess *script_file = FileAccess::open(p_script_directory + p_script_name, FileAccess::READ, &script_status);
+	if (script_status == Error::OK) {
+		evaluate(p_script_json, script_file->get_as_utf8_string());
+	}
+}
 
+GodoukenTranslator::GodoukenTranslator() :
+	script(nullptr),
+	script_line_begin(-1),
+	script_line_finish(-1) {
+	
 	script_reserved_godot_methods.push_back("_init");
 	script_reserved_godot_methods.push_back("_ready");
 	script_reserved_godot_methods.push_back("_process");
 	script_reserved_godot_methods.push_back("_process_physics");
 	script_reserved_godot_methods.push_back("_enter_tree");
 	script_reserved_godot_methods.push_back("_exit_tree");
-	script_reserved_godot_types.push_back("bool");
-	script_reserved_godot_types.push_back("int");
-	script_reserved_godot_types.push_back("float");
-	script_reserved_godot_types.push_back("String");
-	script_reserved_godot_types.push_back("Vector2");
-	script_reserved_godot_types.push_back("Vector3");
-	script_reserved_godot_types.push_back("Rect2");
-	script_reserved_godot_types.push_back("Transform2D");
-	script_reserved_godot_types.push_back("Transform");
-	script_reserved_godot_types.push_back("Plane");
-	script_reserved_godot_types.push_back("Quat");
-	script_reserved_godot_types.push_back("AABB");
-	script_reserved_godot_types.push_back("Basis");
-	script_reserved_godot_types.push_back("Color");
-	script_reserved_godot_types.push_back("NodePath");
-	script_reserved_godot_types.push_back("RID");
-	script_reserved_godot_types.push_back("Object");
-	script_reserved_godot_types.push_back("Array");
-	script_reserved_godot_types.push_back("Dictionary");
-	script_reserved_godot_types.push_back("PoolByteArray");
-	script_reserved_godot_types.push_back("PoolIntArray");
-	script_reserved_godot_types.push_back("PoolRealArray");
-	script_reserved_godot_types.push_back("PoolStringArray");
-	script_reserved_godot_types.push_back("PoolVector2Array");
-	script_reserved_godot_types.push_back("PoolVector3Array");
-	script_reserved_godot_types.push_back("PoolColorArray");
 }
 
-GodoukenTranslatorV2::~GodoukenTranslatorV2() {
+GodoukenTranslator::~GodoukenTranslator() {
 
 }
