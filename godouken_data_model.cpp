@@ -51,9 +51,7 @@ void GodoukenDataModel::data() {
 		godouken_translator->evaluate(godouken_model[directory_script.data_name].data_json, directory_script.data_file, directory_script.data_directory);
 		memdelete(godouken_translator);
 	}
-
-	godouken_model.front();
-
+	
 	for (Map<String, GodoukenDataEntry>::Element *E = godouken_model.front(); E; E = E->next()) {
 		inja::Environment env;
 
