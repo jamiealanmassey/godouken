@@ -1,5 +1,5 @@
 <div style="text-align:center">
-    <img src="./icons/logo_detailed_md.PNG" />
+    <img src="icons/logo_detailed_md.png" />
 </div>
 
 ## What is Godouken?
