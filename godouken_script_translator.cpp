@@ -183,6 +183,7 @@ void GodoukenTranslator::get_type_info(String &p_type_name, String &p_type_href,
 
 void GodoukenTranslator::populate(nlohmann::json &p_script_json) {
 	p_script_json["data"]["script"]["name"] = "";
+	p_script_json["data"]["script"]["name_sm"] = "";
 	p_script_json["data"]["script"]["description"]["brief"] = "";
 	p_script_json["data"]["script"]["description"]["detailed"] = "";
 	p_script_json["data"]["script"]["meta"]["deprecated"] = "";
@@ -286,11 +287,13 @@ void GodoukenTranslator::evaluate_property(nlohmann::json &p_script_json, const 
 void GodoukenTranslator::evaluate_script(nlohmann::json &p_script_json, const Array &p_members_to_keys) {
 	GodoukenScriptTranslatorCommentParser *comment_parser = memnew(GodoukenScriptTranslatorCommentParser);
 	comment_parser->parse(script_lines, 0, script_line_begin);
-	p_script_json["data"]["script"]["name"] = comment_parser->get_data_set_first("@name")->comment_body.utf8();
+	const String &script_name = comment_parser->get_data_set_first("@name")->comment_body;
+	p_script_json["data"]["script"]["name"] = script_name.utf8();
+	p_script_json["data"]["script"]["name_sm"] = script_name.replace(" ", "_").to_lower().utf8();
 	p_script_json["data"]["script"]["description"]["brief"] = comment_parser->get_data_set_first("@brief")->comment_body.utf8();
 	p_script_json["data"]["script"]["description"]["detailed"] = comment_parser->get_data_set_first("@detailed")->comment_body.utf8();
 	p_script_json["data"]["script"]["meta"]["deprecated"] = comment_parser->get_data_set_first("@deprecated")->comment_body.utf8();
-	p_script_json["data"]["script"]["meta"]["version"] = comment_parser->get_data_set_first("@version")->comment_body.to_float();
+	p_script_json["data"]["script"]["meta"]["version"] = comment_parser->get_data_set_first("@version")->comment_body.utf8();
 	p_script_json["data"]["script"]["meta"]["created"] = comment_parser->get_data_set_first("@created")->comment_body.utf8();
 	p_script_json["data"]["script"]["meta"]["modified"] = comment_parser->get_data_set_first("@modified")->comment_body.utf8();
 	p_script_json["data"]["script"]["meta"]["collection"] = comment_parser->get_data_set_first("@collection")->comment_body.utf8();

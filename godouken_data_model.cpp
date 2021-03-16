@@ -1,15 +1,18 @@
 /* godouken_data_model.cpp */
 
-#include "godouken_data_model.h"
-
 #include "editor/editor_node.h"
 #include "editor/editor_scale.h"
 #include "core/os/file_access.h"
 #include "core/class_db.h"
 
-#include "godouken_script_translator.h"
-#include "stencils/godouken_stencil_class.h"
 #include "third_party/inja.hpp"
+
+#include "godouken_data_model.h"
+#include "godouken_script_translator.h"
+
+#include "stencils/godouken_stencil_class_sidebar.h"
+#include "stencils/godouken_stencil_class.h"
+#include "stencils/godouken_stencil_style.h"
 
 Vector<String> GodoukenDataEntry::extract_breadcrumbs(const String &p_directory_path) {
 	return p_directory_path.split("//");
@@ -51,6 +54,9 @@ void GodoukenDataModel::data() {
 		godouken_translator->evaluate(godouken_model[directory_script.data_name].data_json, directory_script.data_file, directory_script.data_directory);
 		memdelete(godouken_translator);
 	}
+
+	nlohmann::json sidebar_json = nlohmann::json::object();
+	sidebar_json["data"]["scripts"] = nlohmann::json::array();
 	
 	for (Map<String, GodoukenDataEntry>::Element *E = godouken_model.front(); E; E = E->next()) {
 		inja::Environment env;
@@ -58,6 +64,9 @@ void GodoukenDataModel::data() {
 		GodoukenDataEntry &script_entry = E->value();
 		script_entry.data_json["data"]["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().utf8();
 		script_entry.data_json["data"]["script"]["breadcrumbs"] = nlohmann::json::array();
+		if (script_entry.data_json["data"]["script"]["name_sm"] != "") {
+			sidebar_json["data"]["scripts"].push_back(script_entry.data_json["data"]["script"]["name_sm"]);
+		}
 		
 		const std::string result = env.render(godouken_stencil_class, script_entry.data_json);
 		const String &dir_html = "res://godouken/html/";
@@ -73,6 +82,34 @@ void GodoukenDataModel::data() {
 		memdelete(file);
 	}
 
+	inja::Environment env_style;
+	const std::string style = env_style.render(godouken_stencil_style, nullptr);
+	const String &dir_css = "res://godouken/css/";
+	dir->change_dir(dir_css);
+	if (!dir->dir_exists(dir_css)) {
+		dir->make_dir_recursive(dir_css);
+	}
+
+	FileAccess *file_css = FileAccess::create(FileAccess::AccessType::ACCESS_RESOURCES);
+	file_css->reopen(dir_css + "main.css", FileAccess::WRITE);
+	file_css->store_string(style.c_str());
+	file_css->close();
+	memdelete(file_css);
+	
+	inja::Environment env_sidebar;
+	const std::string sidebar = env_sidebar.render(godouken_stencil_class_sidebar, sidebar_json);
+	const String &dir_generic = "res://godouken/html/generic/";
+	dir->change_dir(dir_generic);
+	if (!dir->dir_exists(dir_generic)) {
+		dir->make_dir_recursive(dir_generic);
+	}
+
+	FileAccess *file_sidebar = FileAccess::create(FileAccess::AccessType::ACCESS_RESOURCES);
+	file_sidebar->reopen(dir_generic + "sidebar.html", FileAccess::WRITE);
+	file_sidebar->store_string(sidebar.c_str());
+	file_sidebar->close();
+	memdelete(file_sidebar);
+	
 	memdelete(dir);
 }
 

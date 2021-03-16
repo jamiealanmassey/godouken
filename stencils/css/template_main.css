@@ -1,0 +1,133 @@
+html,
+body {
+	min-width: 100%;
+	padding: 0;
+	margin: 0;
+}
+
+iframe {
+    overflow: hidden;
+}
+
+a:link,
+a:visited {
+	color: #FF8C00;
+	font-weight: bold;
+}
+
+.text-orange {
+	color: #FF8C00;
+}
+
+.scroll-y {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	scrollbar-width: none
+}
+
+#sidebar {
+	background-color: rgba(240, 240, 240, 200);
+}
+
+#sidebar-nav ul {
+	list-style-type: none;
+	padding: 0;
+}
+
+#logo-container {
+	background: rgba(250, 250, 250, 200);
+}
+
+.project-header {
+	font-size: 1.1vw;
+}
+
+.tree-item:hover {
+	background-color: rgba(235, 235, 235, 200);
+}
+
+.tree-item a,
+.tree-item a:hover {
+	font-weight: 700;
+	font-size: 0.8em;
+	display: block;
+	padding: 1px 0 1px 5%;
+	color: #111;
+	text-decoration: none;
+}
+
+.tree-item-heading {
+	margin-top: 5px;
+	margin-left: 5%;
+	margin-bottom: 5px;
+	font-weight: bold;
+	color: #FF8C00;
+}
+
+.no-wrap {
+	white-space: nowrap;
+}
+
+.uppercase {
+	text-transform: uppercase;
+}
+
+.text-sizing-1 {
+	font-size: 0.8em !important;
+}
+
+.widget {
+	padding: 0.2rem 0.3rem;
+	font-size: 0.75rem;
+	font-weight: bold;
+}
+
+/* used in conjunction with the border class from bootstrap */
+.border-2 { border-width: 2px !important; }
+.border-3 {	border-width: 3px !important; }
+
+/* used with headers in script definition files to add style to headers */
+.special-1 { letter-spacing: 3px; }
+.special-2 { letter-spacing: 0.05rem; }
+
+/* used in displaying code snippets to add indentation */
+.indent-0 { margin-left: 0px; }
+.indent-1 { margin-left: 16px; }
+.indent-2 { margin-left: 32px; }
+.indent-3 { margin-left: 48px; }
+.indent-4 { margin-left: 64px; }
+.indent-5 { margin-left: 80px; }
+.indent-6 { margin-left: 96px; }
+.indent-7 { margin-left: 112px; }
+.indent-8 { margin-left: 128px; }
+.indent-9 { margin-left: 144px; }
+
+::-webkit-scrollbar {
+    width: 0px;  /* Remove scrollbar space */
+    background: transparent;  /* Optional: just make scrollbar invisible */
+}
+
+.table td.fit,
+.table th.fit {
+    white-space: nowrap;
+    width: 1%;
+}
+
+.demo-icon
+{
+	font-family: "fontello";
+	font-style: normal;
+	font-weight: normal;
+	speak: none;
+	display: inline-block;
+	text-decoration: inherit;
+	width: 1em;
+	margin-right: .2em;
+	text-align: center;
+	font-variant: normal;
+  	text-transform: none;
+ 	line-height: 1em;
+	margin-left: .2em;
+	-webkit-font-smoothing: antialiased;
+  	-moz-osx-font-smoothing: grayscale;
+}

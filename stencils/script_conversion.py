@@ -2,11 +2,12 @@
 import sys
 import re
 
-if len(sys.argv) == 3:
+if len(sys.argv) == 4:
     in_file = sys.argv[1]
-    in_name = sys.argv[2]
+    in_file_ext = sys.argv[2]
+    in_name = sys.argv[3]
 
-    with open(in_file + '.html', 'r') as f_template:
+    with open(in_file + in_file_ext, 'r') as f_template:
         f_wrapper = '/* ' + in_name + '.h */\n\n'
         f_wrapper += '#ifndef ' + in_name.upper() + '_H\n'
         f_wrapper += '#define ' + in_name.upper() + '_H\n\n'

@@ -1,9 +1,8 @@
 <html>
 	<head>
-		<title>{{ data.project.title }} {% if data.script.name %} - {{ data.script.name }} {% endif %}</title>
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-		<link rel="stylesheet" href="./../css/style_shared.css">
-		<link rel="stylesheet" href="./../css/style_class.css">
+		<title>{{ data.project.title }} {% if data.script.name != "" %} - {{ data.script.name }} {% endif %}</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<link rel="stylesheet" href="./../css/main.css">
 	</head>
 	<body>
 		<div class="container-fluid h-100" id="main-content">
@@ -16,41 +15,8 @@
 							</div>
 						</div>
 					</div>
-					<div id="sidebar-nav" class="container-fluid p-0 scroll-y">
-						<ul>
-							<li class="tree-item-heading">OVERVIEW</li>
-							<li class="tree-item"><a href="#">Introduction</a></li>
-							<li class="tree-item"><a href="#">Project Graph</a></li>
-							<li class="tree-item"><a href="#">About</a></li>
-							<li class="tree-item"><a href="#">Todos</a></li>
-							<li class="tree-item"><a href="#">Roadmaps</a></li>
-							<li class="tree-item-heading">COLLECTIONS</li>
-							<li class="tree-item"><a href="#">Entities</a></li>
-							<li class="tree-item"><a href="#">Levels</a></li>
-							<li class="tree-item"><a href="#">Systems</a></li>
-							<li class="tree-item"><a href="#">Menus</a></li>
-							<li class="tree-item-heading">SCRIPT API</li>
-							<li class="tree-item"><a href="#">DefaultWeapon</a></li>
-							<li class="tree-item"><a href="#">Enemy</a></li>
-							<li class="tree-item"><a href="#">EnemyState</a></li>
-							<li class="tree-item"><a href="#">Humanoid</a></li>
-							<li class="tree-item"><a href="#">InfantryPilot</a></li>
-							<li class="tree-item"><a href="#">Kitten</a></li>
-							<li class="tree-item"><a href="#">LevelUI</a></li>
-							<li class="tree-item"><a href="#">MainMenu</a></li>
-							<li class="tree-item"><a href="#">ManagerGame</a></li>
-							<li class="tree-item"><a href="#">ManagerLevel</a></li>
-							<li class="tree-item"><a href="#">Player</a></li>
-							<li class="tree-item"><a href="#">PlayerKeystate</a></li>
-							<li class="tree-item"><a href="#">PlayerKeystateSorter</a></li>
-							<li class="tree-item"><a href="#">StatWidget</a></li>
-							<li class="tree-item"><a href="#">Upgrade</a></li>
-							<li class="tree-item"><a href="#">UpgradeProjectile</a></li>
-							<li class="tree-item"><a href="#">UpgradeSocket</a></li>
-							<li class="tree-item"><a href="#">UpgradeStats</a></li>
-							<li class="tree-item"><a href="#">UpgradeSystem</a></li>
-							<li class="tree-item"><a href="#">UpgradeType</a></li>
-						</ul>
+					<div id="sidebar-nav" class="container-fluid p-0 scroll-y h-100">
+						<iframe src="generic/sidebar.html" width="100%" height="100%" style="border: 0;"></iframe>
 					</div>
 				</div>
 				<div class="col-10 h-100 d-flex flex-column scroll-y">
@@ -124,6 +90,7 @@
 							</div>
 							{% endif %}
 						</div>
+						{% if length(data.script.properties) > 0 %}
 						<div id="content-main-body" class="container my-3">
 							<div class="row">
 								<h5 class="special-1">Script Properties</h5>
@@ -168,6 +135,8 @@
 								</table>
 							</div>
 						</div>
+						{% endif %}
+						{% if length(data.script.properties) %}
 						<div id="content-main-body-detailed" class="container my-3">
 							<div class="row mt-3">
 								<h3 class="special-1">Property Descriptions</h3>
@@ -186,9 +155,11 @@
 													{{ property.name }}
 												</h6>
 												{% if property.description.brief %}
+												<span class="special-2"><i><strong>Property Brief Description</strong></i></span>
 												<p>{{ property.description.brief }}</p>
 												{% endif %}
 												{% if property.description.detailed %}
+												<span class="special-2"><i><strong>Property Detailed Description</strong></i></span>
 												<p>{{ property.description.detailed }}</p>
 												{% endif %}
 											</div>
@@ -198,12 +169,13 @@
 								</div>
 							</div>
 						</div>
+						{% endif %}
 					</div>
 				</div>
 			</div>
 		</div>
-		<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 	</body>
 </html>
