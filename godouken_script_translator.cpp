@@ -206,6 +206,17 @@ void GodoukenTranslator::evaluate_signal(nlohmann::json &p_script_json, const Me
 	p_script_json["data"]["script"]["signals"].push_back(signal_json);
 }
 
+bool contains(const List<String> &p_data, const String &p_keyword) {
+	bool is_found = false;
+	for (int32_t i = 0; i < p_data.size(); i++) {
+		if (p_data[i].find(p_keyword) > 0) {
+			is_found = true;
+		}
+	}
+
+	return is_found;
+}
+
 void GodoukenTranslator::evaluate_method(nlohmann::json &p_script_json, const MethodInfo &p_method_info) const {
 	GodoukenScriptTranslatorCommentParser *comment_parser = memnew(GodoukenScriptTranslatorCommentParser);
 	comment_parser->parse(script_lines, script_line_begin, script_line_finish);
@@ -220,16 +231,19 @@ void GodoukenTranslator::evaluate_method(nlohmann::json &p_script_json, const Me
 	method_json["name"] = p_method_info.name.utf8();
 	method_json["description"]["brief"] = comment_parser->get_data_set_first("@brief")->comment_body.utf8();
 	method_json["description"]["detailed"] = comment_parser->get_data_set_first("@detailed")->comment_body.utf8();
-	method_json["tags"]["is_godot"] = false;
+	method_json["tags"]["is_godot"] = contains(script_reserved_godot_methods, p_method_info.name);
+	method_json["tags"]["is_private"] = p_method_info.name.size() > 0 && p_method_info.name[0] == '_';
 	method_json["tags"]["is_internal"] = false;
 	method_json["tags"]["is_overrider"] = is_virtual;
 	method_json["tags"]["cl_overrider"] = false;
 	method_json["extra"]["warning"] = comment_parser->get_data_set_first("@warning")->comment_body.utf8();
 	method_json["extra"]["info"] = comment_parser->get_data_set_first("@info")->comment_body.utf8();
-
+	method_json["parameters"] = nlohmann::json::array();
+	method_json["see"] = nlohmann::json::array();
+	
 	method_json["return"]["description"] = comment_parser->get_data_set_first("@return")->comment_body.utf8();
-	method_json["return"]["type_info"]["name"] = "";
-	method_json["return"]["type_info"]["href"] = "";
+	method_json["return"]["type_info"]["name"] = type_name.utf8();
+	method_json["return"]["type_info"]["href"] = type_href.utf8();
 	
 	const CommentDataSet &comment_args_set = comment_parser->get_data_set("@parameter");
 	for (int32_t x = 0; x < p_method_info.arguments.size(); x++) {

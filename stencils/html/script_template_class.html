@@ -124,7 +124,7 @@
 												{% endif %}
 												{% if property.tags.is_exported %}
 												<div class="d-flex text-white">
-												<span class="widget bg-dark rounded mx-0 px-2">exports // {{ property.type_info.name }}</span>
+												<span class="widget bg-dark rounded mx-0 px-2">exports -> {{ property.type_info.name }}</span>
 												</div>
 												{% endif %}
 											</td>
@@ -136,17 +136,76 @@
 							</div>
 						</div>
 						{% endif %}
-						{% if length(data.script.properties) %}
+
+						{% if length(data.script.methods) > 0 %}
+						<div id="content-main-body" class="container my-3">
+							<div class="row">
+								<h5 class="special-1">Method Properties</h5>
+								<table class="table table-sm mt-3">
+									<thead>
+										<tr>
+											<td><strong>Return Type</strong></td>
+											<td><strong>Method Definition</strong></td>
+											<td><strong>Special Tags</strong></td>
+										</tr>
+									</thead>
+									<tbody>
+										{% for method in data.script.methods %}
+										<tr>
+											<td>
+												{% if method.return.type_info.name != "nil" %}
+												<a href="{{ method.return.type_info.href }}" target="_blank">{{ method.return.type_info.name }}</a>
+												{% else %}
+												<a href="#">void</a>
+												{% endif %}
+											</td>
+											<td>
+												<a href="#{{ method.name }}">{{ method.name }}</a> 
+												{% if length(method.parameters) > 0 %}
+												 ( 
+												{% for parameter in method.parameters %}
+												<a href="{{ parameter.type_info.href }}">{{ parameter.type_info.name }}</a> {{ parameter.name }}{% if not loop.is_last and length(method.parameters) > 1 %}, {% endif %}
+												{% endfor %}
+												 ) 
+												{% else %}
+												( ) 
+												{% endif %}
+											</td>
+											<td>
+												{% if method.tags %}
+												<div class="d-flex">
+													{% if method.tags.is_godot %}
+													<div class="d-flex text-white">
+														<span class="widget bg-info rounded mx-0 px-2">godot method</span>
+													</div>
+													{% endif %}
+													{% if method.tags.is_private %}
+													<div class="d-flex text-white ml-2">
+														<span class="widget bg-dark rounded mx-0 px-2">internal / private</span>
+													</div>
+													{% endif %}
+												</div>
+												{% endif %}
+											</td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+						{% endif %}
+
+						{% if length(data.script.properties) > 0 %}
 						<div id="content-main-body-detailed" class="container my-3">
 							<div class="row mt-3">
 								<h3 class="special-1">Property Descriptions</h3>
 								<div class="method-descriptor container-fluid border-left border-success border-3 bg-light mt-3">
 									{% for property in data.script.properties %}
-									<div class="container-fluid border-left border-info border-3 my-3 ml-2 py-2">
+									<div id="{{ property.name }}" class="container-fluid border-left border-info border-3 my-3 ml-2 py-2">
 										<div class="row ml-2 mt-2 d-flex flex-column">
 											<span class="special-2"><i><strong>Property Signature</strong></i></span>
 											<div>
-												<h6 class="my-0">
+												<h6 class="">
 													{% if property.type_info.href %}
 													<a href="{{ property.type_info.href }}" target="_blank">{{ property.type_info.name }}</a>&nbsp;
 													{% else %}
@@ -154,15 +213,92 @@
 													{% endif %}
 													{{ property.name }}
 												</h6>
-												{% if property.description.brief %}
-												<span class="special-2"><i><strong>Property Brief Description</strong></i></span>
-												<p>{{ property.description.brief }}</p>
-												{% endif %}
-												{% if property.description.detailed %}
-												<span class="special-2"><i><strong>Property Detailed Description</strong></i></span>
-												<p>{{ property.description.detailed }}</p>
-												{% endif %}
 											</div>
+											{% if property.description.brief != "" %}
+											<span class="special-2"><i><strong>Brief Description</strong></i></span>
+											<p>{{ property.description.brief }}</p>
+											{% endif %}
+											{% if property.description.detailed != "" %}
+											<span class="special-2"><i><strong>Detailed Description</strong></i></span>
+											<p>{{ property.description.detailed }}</p>
+											{% endif %}
+										</div>
+									</div>
+									{% endfor %}
+								</div>
+							</div>
+						</div>
+						{% endif %}
+
+						{% if length(data.script.methods) > 0 %}
+						<div id="content-main-body-detailed" class="container my-3">
+							<div class="row mt-3">
+								<h3 class="special-1">Method Descriptions</h3>
+								<div class="method-descriptor container-fluid border-left border-success border-3 bg-light mt-3">
+									{% for method in data.script.methods %}
+									<div id="{{ method.name }}" class="container-fluid border-left border-info border-3 my-3 ml-2 py-2">
+										<div class="row ml-2 mt-2 d-flex flex-column">
+											<span class="special-2"><i><strong>Method Signature</strong></i></span>
+											<div>
+												<h6 class="">
+												{% if method.return.type_info.name != "nil" %}
+												<a href="{{ method.return.type_info.href }}" target="_blank">{{ method.return.type_info.name }}</a>
+												{% else %}
+												<a href="#">void</a>
+												{% endif %}
+												{{ method.name }}&nbsp;
+												{% if length(method.parameters) > 0 %}
+												 ( 
+												{% for parameter in method.parameters %}
+												<a href="{{ parameter.type_info.href }}">{{ parameter.type_info.name }}</a> {{ parameter.name }}{% if not loop.is_last and length(method.parameters) > 1 %}, {% endif %}
+												{% endfor %}
+												 ) 
+												{% else %}
+												( ) 
+												{% endif %}
+												</h6>
+											</div>
+											{% if method.description.brief != "" %}
+											<span class="special-2"><i><strong>Brief Description</strong></i></span>
+											<p>{{ method.description.brief }}</p>
+											{% endif %}
+											{% if method.description.detailed != "" %}
+											<span class="special-2"><i><strong>Detailed Description</strong></i></span>
+											<p>{{ method.description.detailed }}</p>
+											{% endif %}
+											{% if method.return.description != "" %}
+											<span class="special-2"><i><strong>Return Value</strong></i></span>
+											<p>{{ method.return.description }}</p>
+											{% endif %}
+											{% if length(method.parameters) > 0 %}
+												{% for param in method.parameters %}
+													{% if param.description != "" %}
+													<p>{{ loop.index }} - {{ param.description }}</p>
+													{% endif %}
+												{% endfor %}
+											{% endif %}
+											{% if length(method.see) > 0 %}
+											<span class="special-2"><i><strong>See Also</strong></i></span>
+											{% for item in method.see %}
+											<a href="#{{ item }}">{{ item }}</a>&nbsp;
+											{% endfor %}
+											{% endif %}
+											{% if method.extra.warning != "" %}
+											<div class="row ml-2 mt-4 mb-2 text-center">
+												<div class="ml-2 d-flex text-white">
+													<div class="widget text-sizing-1 px-2 bg-warning rounded-left mx-0">warning</div>
+													<div class="widget text-sizing-1 px-2 bg-dark rounded-right mx-0">{{ method.extra.warning }}</div>
+												</div>
+											</div>
+											{% endif %}
+											{% if method.extra.info != "" %}
+											<div class="row ml-2 mt-4 mb-2 text-center">
+												<div class="ml-2 d-flex text-white">
+													<div class="widget text-sizing-1 px-2 bg-info rounded-left mx-0">info</div>
+													<div class="widget text-sizing-1 px-2 bg-dark rounded-right mx-0">{{ method.extra.info }}</div>
+												</div>
+											</div>
+											{% endif %}
 										</div>
 									</div>
 									{% endfor %}
