@@ -27,6 +27,8 @@ a:visited {
 
 #sidebar {
 	background-color: rgba(240, 240, 240, 200);
+	overflow-y: hidden;
+	min-height: 100%;
 }
 
 #sidebar-nav ul {

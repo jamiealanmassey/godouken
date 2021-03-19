@@ -1,0 +1,16 @@
+HTML Template:
+    ✔ Fix issue with tags that stack on top of one another @done(21-03-18 15:09)
+    ✔ Fix issue with 'see' links not formatting correctly @done(21-03-18 15:09)
+    ✔ Fix formatting of sidebar to be clean @done(21-03-18 16:27)
+    ☐ Create visual animation when jumping to element for clear reading
+    ☐ Create breadcrumbs for each script (which link to directory listings)
+C++ Backend:
+    ☐ Add mapping of variable position in list to description
+    ☐ Add directory mappings that list out all relevant scripts (which update at each gen)
+    ☐ Add concepts of collections by create a related set
+    ☐ Add logic portion of the Script Inheritance Tree
+        ☐ Construct the tree visuals component
+        ☐ Construct related 'iframe' that can be dropped into doc
+    ☐ Fix issue where after generating documentation GD scripts can't be saved again
+    ☐ Modify comment parsing to span multiple lines
+    ☐ Break up model processes into executable methods

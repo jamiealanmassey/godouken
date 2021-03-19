@@ -65,11 +65,22 @@ void GodoukenDataModel::data() {
 		script_entry.data_json["data"]["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().utf8();
 		script_entry.data_json["data"]["script"]["breadcrumbs"] = nlohmann::json::array();
 		if (script_entry.data_json["data"]["script"]["name_sm"] != "") {
-			sidebar_json["data"]["scripts"].push_back(script_entry.data_json["data"]["script"]["name_sm"]);
+			script_entry.data_json["data"]["script"]["breadcrumbs"].push_back(".");
+			Vector<String> breadcrumbs = script_entry.data_directory.replace_first("res://", "").split("/");
+			for (uint32_t i = 0; i < breadcrumbs.size(); i++) {
+				const String &str_append = i == breadcrumbs.size() - 1 ? script_entry.data_file : "";
+				const String &str_breadcrumb = breadcrumbs[i] + str_append;
+				script_entry.data_json["data"]["script"]["breadcrumbs"].push_back(str_breadcrumb.utf8());
+			}
+			
+			nlohmann::json sidebar_entry;
+			sidebar_entry["name_fl"] = script_entry.data_json["data"]["script"]["name"];
+			sidebar_entry["name_sm"] = script_entry.data_json["data"]["script"]["name_sm"];
+			sidebar_json["data"]["scripts"].push_back(sidebar_entry);
 		}
 		
 		const std::string result = env.render(godouken_stencil_class, script_entry.data_json);
-		const String &dir_html = "res://godouken/html/";
+		const String &dir_html = "res://docs/html/";
 		dir->change_dir(dir_html);
 		if (!dir->dir_exists(dir_html)) {
 			dir->make_dir_recursive(dir_html);
@@ -84,7 +95,7 @@ void GodoukenDataModel::data() {
 
 	inja::Environment env_style;
 	const std::string style = env_style.render(godouken_stencil_style, nullptr);
-	const String &dir_css = "res://godouken/css/";
+	const String &dir_css = "res://docs/css/";
 	dir->change_dir(dir_css);
 	if (!dir->dir_exists(dir_css)) {
 		dir->make_dir_recursive(dir_css);
@@ -98,7 +109,7 @@ void GodoukenDataModel::data() {
 	
 	inja::Environment env_sidebar;
 	const std::string sidebar = env_sidebar.render(godouken_stencil_class_sidebar, sidebar_json);
-	const String &dir_generic = "res://godouken/html/generic/";
+	const String &dir_generic = "res://docs/html/generic/";
 	dir->change_dir(dir_generic);
 	if (!dir->dir_exists(dir_generic)) {
 		dir->make_dir_recursive(dir_generic);
