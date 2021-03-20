@@ -77,7 +77,7 @@ TEST(TRANSLATOR_TESTS, TEST_EVALUATION_METADATA) {
 	ASSERT_EQ(script_result["data"]["script"]["description"]["brief"], "Defines a generic inheritable script that can be utilised by organisms in the game");
 	ASSERT_EQ(script_result["data"]["script"]["description"]["detailed"], "");
 	ASSERT_EQ(script_result["data"]["script"]["meta"]["deprecated"], "");
-	ASSERT_EQ(script_result["data"]["script"]["meta"]["version"], 1.0f);
+	ASSERT_EQ(script_result["data"]["script"]["meta"]["version"], "1.0");
 	ASSERT_EQ(script_result["data"]["script"]["meta"]["created"], "11/04/2019");
 	ASSERT_EQ(script_result["data"]["script"]["meta"]["modified"], "");
 	ASSERT_EQ(script_result["data"]["script"]["meta"]["collection"], "");

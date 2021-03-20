@@ -10,16 +10,38 @@
 #ifndef GODOUKEN_DATA_MODEL_H
 #define GODOUKEN_DATA_MODEL_H
 
-typedef Map<String, GodoukenData *> GodoukenIndexer;
+static Vector<String> extract_breadcrumbs(const String &p_directory_path);
 
 struct GodoukenDataEntry {
 	String data_name;
 	String data_file;
 	String data_directory;
 	nlohmann::json data_json;
-
-	static Vector<String> extract_breadcrumbs(const String &p_directory_path);
 };
+
+struct GodoukenDirEntry {
+	String dir_name;
+	Vector<GodoukenDataEntry *> dir_files;
+	Vector<GodoukenDirEntry *> dir_children;
+	GodoukenDirEntry *dir_parent;
+
+	GodoukenDirEntry() {
+		dir_name = "";
+		dir_parent = nullptr;
+	}
+	
+	GodoukenDirEntry(GodoukenDirEntry &p_entry) {
+		this->dir_name = p_entry.dir_name;
+		this->dir_files = p_entry.dir_files;
+		this->dir_children = p_entry.dir_children;
+		this->dir_parent = p_entry.dir_parent;
+	}
+};
+
+typedef Vector<String> ModelDirs;
+typedef Vector<GodoukenDataEntry &> ModelDataList;
+typedef Map<CharProxy<CharType>, ModelDataList> ModelAlphaIndexer;
+typedef Map<String, ModelAlphaIndexer> ModelTreeIndexer;
 
 class GodoukenDataModel : public Object {
     GDCLASS(GodoukenDataModel, Object);
@@ -27,23 +49,20 @@ class GodoukenDataModel : public Object {
 protected:
     uint32_t model_script_hash;
     GodoukenDataNodeBase *model_node_root;
-    GodoukenIndexer model_node_indices;
 
 public:
 	void data();
-	
-    void node_index_refresh(GodoukenData *p_node);
-    void node_index_insert(GodoukenData *p_node);
-
-    void script_parse(const String &p_script_file);
-
-    void model_serialise(const String &p_file_name, const String &p_file_location);
-    void model_deserialise(const String &p_file_name, const String &p_file_location);
-
-    GodoukenDataNodeBase *get_node_root();
-    GodoukenDataNodeBase *get_node_from_indexer(const String &p_entry_name);
 
 	Map<String, GodoukenDataEntry> godouken_model;
+
+protected:
+	static void tree_indexer(GodoukenDirEntry *p_node, Vector<String> p_breadcrumbs);
+	static void tree_indexer(GodoukenDirEntry *p_node, Vector<String> p_breadcrumbs, GodoukenDataEntry *p_data_entry);
+	static void tree_indexer(GodoukenDirEntry *p_node, Vector<String> p_breadcrumbs, GodoukenDataEntry *p_data_entry, bool &p_success);
+
+	static Vector<String> tree_breadcrumbs(GodoukenDirEntry *p_node);
+	static String tree_breadcrumb_html(const GodoukenDirEntry *p_node);
+	static String tree_breadcrumb_html(const Vector<String> &p_breadcrumbs);
 	
 public:
     GodoukenDataModel();

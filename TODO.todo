@@ -14,3 +14,4 @@ C++ Backend:
     ☐ Fix issue where after generating documentation GD scripts can't be saved again
     ☐ Modify comment parsing to span multiple lines
     ☐ Break up model processes into executable methods
+    ☐ Cleanup process by adding project data to its own appendable JSON
