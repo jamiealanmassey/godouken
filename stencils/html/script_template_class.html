@@ -172,7 +172,7 @@
 												{% if length(method.parameters) > 0 %}
 												 ( 
 												{% for parameter in method.parameters %}
-												<a href="{{ parameter.type_info.href }}">{{ parameter.type_info.name }}</a> {{ parameter.name }}{% if not loop.is_last and length(method.parameters) > 1 %}, {% endif %}
+												<a href="{{ parameter.type_info.href }}" target="blank">{{ parameter.type_info.name }}</a> {{ parameter.name }}{% if not loop.is_last and length(method.parameters) > 1 %}, {% endif %}
 												{% endfor %}
 												 ) 
 												{% else %}
@@ -257,7 +257,7 @@
 											{% if length(method.parameters) > 0 %}
 												( 
 											{% for parameter in method.parameters %}
-											<a href="{{ parameter.type_info.href }}">{{ parameter.type_info.name }}</a> {{ parameter.name }}{% if not loop.is_last and length(method.parameters) > 1 %}, {% endif %}
+											<a href="{{ parameter.type_info.href }}"  target="blank">{{ parameter.type_info.name }}</a> {{ parameter.name }}{% if not loop.is_last and length(method.parameters) > 1 %}, {% endif %}
 											{% endfor %}
 												) 
 											{% else %}
