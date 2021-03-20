@@ -5,7 +5,7 @@ Phase #1:
         ✔ Fix formatting of sidebar to be clean @done(21-03-18 16:27)
         ☐ Create visual animation when jumping to element for clear reading
         ✔ Create breadcrumbs for each script (which link to directory listings) @done(21-03-20 21:02)
-        ☐ Fix issue where method params don't open Godot docs in new tab
+        ✔ Fix issue where method params don't open Godot docs in new tab @done(21-03-20 21:25)
     C++ Backend:
         ☐ Add mapping of variable position in list to description
         ✔ Add directory mappings that list out all relevant scripts (which update at each gen) @done(21-03-20 18:37)
@@ -16,7 +16,7 @@ Phase #1:
             ☐ Construct related 'iframe' that can be dropped into doc
         ☐ Fix issue where after generating documentation GD scripts can't be saved again
         ✔ Fix issue where HTML script name uses comment name rather than actual file name @done(21-03-20 19:47)
-        ☐ Fix issue where "." directory isn't generated in directories
+        ✔ Fix issue where "." directory isn't generated in directories @done(21-03-20 22:31)
         ☐ Modify comment parsing to span multiple lines
         ☐ Break up model processes into executable methods
         ☐ Cleanup process by adding project data to its own appendable JSON
@@ -25,3 +25,5 @@ Phase #2:
         ☐ Add ability to filter out certain directories
         ☐ Add project JSON data into single JSON object injected into other objects
         ☐ Add output of generation progress to Panel
+    Misc:
+        ☐ Pass over all GDScript files and make sure they conform to standard

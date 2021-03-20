@@ -165,7 +165,6 @@ void GodoukenDataModel::data() {
 		}*/
 
 		tree_breadcrumb_json(directory_info, directory_json);
-		
 		directories_json.push_back(directory_json);
 		dir_evaluation.remove(0);
 	}
@@ -205,7 +204,7 @@ void GodoukenDataModel::data() {
 		inja::Environment env;
 
 		GodoukenDataEntry *script_entry = E->value();
-		script_entry->data_json["data"]["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().utf8();
+		script_entry->data_json["data"]["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().capitalize().utf8();
 		script_entry->data_json["data"]["script"]["breadcrumbs"] = nlohmann::json::array();
 		if (script_entry->data_json["data"]["script"]["name_sm"] != "") {
 			tree_breadcrumb_json(script_entry->data_parent_dir, script_entry->data_json["data"]["script"]);
@@ -214,6 +213,7 @@ void GodoukenDataModel::data() {
 			breadcrumb_script["name"] = (name_html + ".gd").utf8();
 			breadcrumb_script["url"] = "";
 			script_entry->data_json["data"]["script"]["breadcrumbs"].push_back(breadcrumb_script);
+			script_entry->data_json["data"]["script"]["breadcrumbs"][0]["url"] = ".html";
 			
 			nlohmann::json sidebar_entry;
 			sidebar_entry["name_fl"] = script_entry->data_json["data"]["script"]["name"];
@@ -343,21 +343,18 @@ Vector<String> GodoukenDataModel::tree_breadcrumbs(GodoukenDirEntry *p_node) {
 String GodoukenDataModel::tree_breadcrumb_html(const GodoukenDirEntry *p_node)
 {
 	String result = "";
-	if (p_node && p_node->dir_parent) {
+	if (p_node) {
 		const GodoukenDirEntry *node_current = p_node;
 		String breadcrumb = ".html";
 		String breadcrumb_end = "";
 		bool breadcrumb_first = true;
 		//breadcrumb = node_current->dir_name + breadcrumb;
 		do {
-			if (node_current->dir_name != ".") {
-				breadcrumb_end = breadcrumb_first ? "" : "_";
-				breadcrumb = node_current->dir_name + breadcrumb_end + breadcrumb;
-				breadcrumb_first = false;
-			}
-
+			breadcrumb_end = breadcrumb_first ? "" : "_";
+			breadcrumb = node_current->dir_name + breadcrumb_end + breadcrumb;
+			breadcrumb_first = false;
 			node_current = node_current->dir_parent;
-		} while (node_current->dir_parent);
+		} while (node_current);
 
 		result = breadcrumb;
 	}

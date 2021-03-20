@@ -56,6 +56,11 @@
 								{% endfor %}
 							</div>
 							{% endif %}
+							{% if length(entries.dirs) == 0 and length(entries.abc) == 0 %}
+							<div class="row mt-4 justify-content-center">
+								<h2 class="text-muted"><b>There are no directories or files to show</b></h2>
+							</div>
+							{% endif %}
 						</div>
 					</div>
 				</div>
