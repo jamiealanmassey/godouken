@@ -47,7 +47,7 @@ void extract_breadcrumbs(const String &p_directory_path, nlohmann::json &p_bread
 
 void GodoukenDataModel::data() {
 	Vector<String> directories;
-	Vector<GodoukenDataEntry> directories_scripts;
+	Vector<GodoukenDataEntry *> directories_scripts;
 	//ModelTreeIndexer directory_tree;
 	nlohmann::json directory_json = nlohmann::json::object();
 
@@ -71,16 +71,6 @@ void GodoukenDataModel::data() {
 					directories.push_back(str_path);
 					tree_indexer(root_dir, extract_breadcrumbs(str_path));
 				}
-				/*else {
-					if (dir_filename.find(".gd") >= 0) {
-						GodoukenDataEntry *directory_script = new GodoukenDataEntry();
-						directory_script->data_directory = dir->get_current_dir_without_drive() + "/";
-						directory_script->data_file = dir_filename;
-						directory_script->data_name = dir_filename.substr(0, dir_filename.find_char('.'));
-						directories_scripts.push_back(*directory_script);
-						tree_indexer(root_dir, extract_breadcrumbs(str_dir), directory_script);
-					}
-				}*/
 			}
 		}
 	}
@@ -105,7 +95,7 @@ void GodoukenDataModel::data() {
 						directory_script->data_directory = dir->get_current_dir_without_drive() + "/";
 						directory_script->data_file = dir_filename;
 						directory_script->data_name = dir_filename.substr(0, dir_filename.find_char('.'));
-						directories_scripts.push_back(*directory_script);
+						directories_scripts.push_back(directory_script);
 						tree_indexer(root_dir, extract_breadcrumbs(str_dir), directory_script);
 					}
 				}
@@ -122,7 +112,7 @@ void GodoukenDataModel::data() {
 		nlohmann::json directory_json = nlohmann::json::object();
 		directory_json["entries"]["dirs"] = nlohmann::json::array();
 		directory_json["entries"]["abc"] = nlohmann::json::array();
-		directory_json["breadcrumbs"] = nlohmann::json::array(); // tree_breadcrumbs(directory_info);
+		directory_json["breadcrumbs"] = nlohmann::json::array();
 		directory_json["url"] = tree_breadcrumb_html(directory_info).utf8();
 		for (uint32_t i = 0; i < directory_info->dir_children.size(); i++) {
 			const GodoukenDirEntry *dir_child = directory_info->dir_children[i];
@@ -143,6 +133,7 @@ void GodoukenDataModel::data() {
 			nlohmann::json directory_child = nlohmann::json::object();
 			directory_child["name_script"] = dir_data_entry->data_file.utf8();
 			directory_child["name"] = dir_data_entry->data_name.replace("_", " ").capitalize().utf8();
+			directory_child["name_html"] = dir_data_entry->data_name.utf8();
 			directory_child["path"] = dir_data_entry->data_directory.utf8();
 			directory_alpha_jsons[alpha].push_back(directory_child);
 		}
@@ -158,7 +149,7 @@ void GodoukenDataModel::data() {
 			dir_evaluation.push_back(directory_info->dir_children[i]);
 		}
 
-		GodoukenDirEntry *node_current = directory_info;
+		/*GodoukenDirEntry *node_current = directory_info;
 		List<nlohmann::json> breadcrumbs_json;
 		do {
 			nlohmann::json breadcrumb = nlohmann::json::object();
@@ -171,7 +162,9 @@ void GodoukenDataModel::data() {
 		breadcrumbs_json.invert();
 		for (uint32_t i = 0; i < breadcrumbs_json.size(); i++) {
 			directory_json["breadcrumbs"].push_back(breadcrumbs_json[i]);
-		}
+		}*/
+
+		tree_breadcrumb_json(directory_info, directory_json);
 		
 		directories_json.push_back(directory_json);
 		dir_evaluation.remove(0);
@@ -199,36 +192,36 @@ void GodoukenDataModel::data() {
 	// EVALUATE GD SCRIPT FILES AND EXTRACT JSON
 	for (uint32_t i = 0; i < directories_scripts.size(); i++) {
 		GodoukenTranslator *godouken_translator = memnew(GodoukenTranslator);
-		GodoukenDataEntry directory_script = directories_scripts[i];
-		godouken_model.insert(directory_script.data_name, directory_script);
-		godouken_translator->evaluate(godouken_model[directory_script.data_name].data_json, directory_script.data_file, directory_script.data_directory);
+		GodoukenDataEntry *directory_script = directories_scripts[i];
+		godouken_model.insert(directory_script->data_name, directory_script);
+		godouken_translator->evaluate(godouken_model[directory_script->data_name]->data_json, directory_script->data_file, directory_script->data_directory);
+		godouken_model[directory_script->data_name]->data_json["data"]["script"]["name_html"] = directory_script->data_name.utf8();
 		memdelete(godouken_translator);
 	}
 
 	nlohmann::json sidebar_json = nlohmann::json::object();
 	sidebar_json["data"]["scripts"] = nlohmann::json::array();
-	for (Map<String, GodoukenDataEntry>::Element *E = godouken_model.front(); E; E = E->next()) {
+	for (Map<String, GodoukenDataEntry*>::Element *E = godouken_model.front(); E; E = E->next()) {
 		inja::Environment env;
 
-		GodoukenDataEntry &script_entry = E->value();
-		script_entry.data_json["data"]["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().utf8();
-		script_entry.data_json["data"]["script"]["breadcrumbs"] = nlohmann::json::array();
-		if (script_entry.data_json["data"]["script"]["name_sm"] != "") {
-			script_entry.data_json["data"]["script"]["breadcrumbs"].push_back(".");
-			Vector<String> breadcrumbs = script_entry.data_directory.replace_first("res://", "").split("/");
-			for (uint32_t i = 0; i < breadcrumbs.size(); i++) {
-				const String &str_append = i == breadcrumbs.size() - 1 ? script_entry.data_file : "";
-				const String &str_breadcrumb = breadcrumbs[i] + str_append;
-				script_entry.data_json["data"]["script"]["breadcrumbs"].push_back(str_breadcrumb.utf8());
-			}
+		GodoukenDataEntry *script_entry = E->value();
+		script_entry->data_json["data"]["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().utf8();
+		script_entry->data_json["data"]["script"]["breadcrumbs"] = nlohmann::json::array();
+		if (script_entry->data_json["data"]["script"]["name_sm"] != "") {
+			tree_breadcrumb_json(script_entry->data_parent_dir, script_entry->data_json["data"]["script"]);
+			nlohmann::json breadcrumb_script;
+			String name_html = script_entry->data_json["data"]["script"]["name_html"].get<std::string>().c_str();
+			breadcrumb_script["name"] = (name_html + ".gd").utf8();
+			breadcrumb_script["url"] = "";
+			script_entry->data_json["data"]["script"]["breadcrumbs"].push_back(breadcrumb_script);
 			
 			nlohmann::json sidebar_entry;
-			sidebar_entry["name_fl"] = script_entry.data_json["data"]["script"]["name"];
-			sidebar_entry["name_sm"] = script_entry.data_json["data"]["script"]["name_sm"];
+			sidebar_entry["name_fl"] = script_entry->data_json["data"]["script"]["name"];
+			sidebar_entry["name_html"] = script_entry->data_json["data"]["script"]["name_html"];
 			sidebar_json["data"]["scripts"].push_back(sidebar_entry);
 		}
 		
-		const std::string result = env.render(godouken_stencil_class, script_entry.data_json);
+		const std::string result = env.render(godouken_stencil_class, script_entry->data_json);
 		const String &dir_html = "res://docs/html/";
 		dir->change_dir(dir_html);
 		if (!dir->dir_exists(dir_html)) {
@@ -236,7 +229,7 @@ void GodoukenDataModel::data() {
 		}
 
 		FileAccess *file = FileAccess::create(FileAccess::AccessType::ACCESS_RESOURCES);
-		file->reopen(dir_html + script_entry.data_name.replace(" ", "_") +".html", FileAccess::WRITE);
+		file->reopen(dir_html + script_entry->data_name.replace(" ", "_") +".html", FileAccess::WRITE);
 		file->store_string(result.c_str());
 		file->close();
 		memdelete(file);
@@ -329,6 +322,7 @@ void GodoukenDataModel::tree_indexer(GodoukenDirEntry *p_node, Vector<String> p_
 		p_breadcrumbs.remove(0);
 		if (p_breadcrumbs.size() == 0) {
 			dir_entry->dir_files.push_back(p_data_entry);
+			p_data_entry->data_parent_dir = dir_entry;
 			p_success = true;
 		}
 	}
@@ -381,6 +375,26 @@ String GodoukenDataModel::tree_breadcrumb_html(const Vector<String> &p_breadcrum
 
 	breadcrumb_html.append(".html");
 	return breadcrumb_html.as_string();
+}
+
+void GodoukenDataModel::tree_breadcrumb_json(const GodoukenDirEntry *p_node, nlohmann::json &p_breadcrumbs)
+{
+	if (p_node) {
+		const GodoukenDirEntry *node_current = p_node;
+		List<nlohmann::json> breadcrumbs_json;
+		do {
+			nlohmann::json breadcrumb = nlohmann::json::object();
+			breadcrumb["name"] = node_current->dir_name.utf8();
+			breadcrumb["url"] = tree_breadcrumb_html(node_current).utf8();
+			breadcrumbs_json.push_back(breadcrumb);
+			node_current = node_current->dir_parent;
+		} while (node_current);
+
+		breadcrumbs_json.invert();
+		for (uint32_t i = 0; i < breadcrumbs_json.size(); i++) {
+			p_breadcrumbs["breadcrumbs"].push_back(breadcrumbs_json[i]);
+		}
+	}
 }
 
 GodoukenDataModel::GodoukenDataModel() {}

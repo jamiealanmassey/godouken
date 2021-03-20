@@ -12,11 +12,13 @@
 
 static Vector<String> extract_breadcrumbs(const String &p_directory_path);
 
+struct GodoukenDirEntry;
 struct GodoukenDataEntry {
 	String data_name;
 	String data_file;
 	String data_directory;
 	nlohmann::json data_json;
+	GodoukenDirEntry *data_parent_dir;
 };
 
 struct GodoukenDirEntry {
@@ -38,11 +40,6 @@ struct GodoukenDirEntry {
 	}
 };
 
-typedef Vector<String> ModelDirs;
-typedef Vector<GodoukenDataEntry &> ModelDataList;
-typedef Map<CharProxy<CharType>, ModelDataList> ModelAlphaIndexer;
-typedef Map<String, ModelAlphaIndexer> ModelTreeIndexer;
-
 class GodoukenDataModel : public Object {
     GDCLASS(GodoukenDataModel, Object);
 
@@ -53,7 +50,7 @@ protected:
 public:
 	void data();
 
-	Map<String, GodoukenDataEntry> godouken_model;
+	Map<String, GodoukenDataEntry *> godouken_model;
 
 protected:
 	static void tree_indexer(GodoukenDirEntry *p_node, Vector<String> p_breadcrumbs);
@@ -63,6 +60,7 @@ protected:
 	static Vector<String> tree_breadcrumbs(GodoukenDirEntry *p_node);
 	static String tree_breadcrumb_html(const GodoukenDirEntry *p_node);
 	static String tree_breadcrumb_html(const Vector<String> &p_breadcrumbs);
+	static void tree_breadcrumb_json(const GodoukenDirEntry *p_node, nlohmann::json &p_breadcrumbs);
 	
 public:
     GodoukenDataModel();

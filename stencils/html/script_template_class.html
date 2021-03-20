@@ -25,7 +25,11 @@
 						<nav aria-label="breadcrumb">
 							<ol class="breadcrumb">
 							{% for crumb in data.script.breadcrumbs %}
-							<li class="breadcrumb-item"><a href="#">{{ crumb }}</a></li>
+							{% if crumb.url != "" %}
+							<li class="breadcrumb-item"><a href="./dirs/{{ crumb.url }}">{{ crumb.name }}</a></li>
+							{% else %}
+							<li class="breadcrumb-item"><a href="#">{{ crumb.name }}</a></li>
+							{% endif %}
 							{% endfor %}
 							</ol>
 						</nav>
