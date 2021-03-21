@@ -2,6 +2,7 @@
 
 #include "godouken_script_translator.h"
 #include "godouken_data_model.h"
+#include "modules/regex/regex.h"
 
 #include "third_party/inja.hpp"
 #include "third_party/crc.h"
@@ -184,6 +185,10 @@ void GodoukenTranslator::get_type_info(String &p_type_name, String &p_type_href,
 void GodoukenTranslator::populate(nlohmann::json &p_script_json) {
 	p_script_json["data"]["script"]["name"] = "";
 	p_script_json["data"]["script"]["name_sm"] = "";
+	p_script_json["data"]["script"]["name_dt"] = "";
+	p_script_json["data"]["script"]["diagram"] = "";
+	p_script_json["data"]["script"]["base"]["name"] = "";
+	p_script_json["data"]["script"]["base"]["color"] = "#FFFFFF";
 	p_script_json["data"]["script"]["description"]["brief"] = "";
 	p_script_json["data"]["script"]["description"]["detailed"] = "";
 	p_script_json["data"]["script"]["meta"]["deprecated"] = "";
@@ -301,9 +306,13 @@ void GodoukenTranslator::evaluate_property(nlohmann::json &p_script_json, const 
 void GodoukenTranslator::evaluate_script(nlohmann::json &p_script_json, const Array &p_members_to_keys) {
 	GodoukenScriptTranslatorCommentParser *comment_parser = memnew(GodoukenScriptTranslatorCommentParser);
 	comment_parser->parse(script_lines, 0, script_line_begin);
-	const String &script_name = comment_parser->get_data_set_first("@name")->comment_body;
+	const String &script_name_parse = comment_parser->get_data_set_first("@name")->comment_body;
+	const String &script_name_prev = p_script_json["data"]["script"]["name"].get<std::string>().c_str();
+	const String &script_name = script_name_parse.empty() ? script_name_prev : script_name_parse;
+
 	p_script_json["data"]["script"]["name"] = script_name.utf8();
 	p_script_json["data"]["script"]["name_sm"] = script_name.replace(" ", "_").to_lower().utf8();
+	p_script_json["data"]["script"]["name_dt"] = script_name.replace(" ", "_").replace("_", " ").capitalize().replace(" ", "").utf8();
 	p_script_json["data"]["script"]["description"]["brief"] = comment_parser->get_data_set_first("@brief")->comment_body.utf8();
 	p_script_json["data"]["script"]["description"]["detailed"] = comment_parser->get_data_set_first("@detailed")->comment_body.utf8();
 	p_script_json["data"]["script"]["meta"]["deprecated"] = comment_parser->get_data_set_first("@deprecated")->comment_body.utf8();
@@ -351,8 +360,28 @@ void GodoukenTranslator::evaluate(nlohmann::json &p_script_json, const String &p
 		script->get_script_method_list(script_methods);
 		script->get_script_signal_list(script_signals);
 		script->get_script_property_list(script_properties);
-
-		int32_t index = 0;
+		p_script_json["data"]["script"]["name"] = script->get_name().utf8();
+		
+		const Map<StringName, Ref<GDScript>> &subclasses = script->get_subclasses();
+		const Ref<Script> base_script = script->get_base_script();
+		const Ref<GDScriptNativeClass> &base_native = script->get_native();
+		if (base_script.is_valid()) {
+			const String &base_path = base_script->get_path();
+			const int base_split = base_path.find_last("/");
+			const int base_end = base_path.find_char('.', base_split);
+			const String &base_name = base_path.substr(base_split + 1, base_end - base_split - 1);
+			const String &base_name_perm = base_name.replace("_", " ").capitalize().replace(" ", "");
+			p_script_json["data"]["script"]["base"]["name"] = base_name_perm.utf8();
+			p_script_json["data"]["script"]["base"]["color"] = "#FFFFFF";
+		}
+		else if (base_native.is_valid()) {
+			const String &base_name = base_native->get_name().operator String();
+			p_script_json["data"]["script"]["base"]["name"] = base_name.utf8();
+			p_script_json["data"]["script"]["base"]["color"] = "#44FFBB";
+		}
+		
+		uint32_t index = 0;
+		uint32_t index_max = 4294967295;
 		if (script_properties) {
 			for (index = 0; index < script_properties->size(); index++) {
 				GodoukenScriptTranslatorPropertyData *member_data = memnew(GodoukenScriptTranslatorPropertyData);
@@ -362,7 +391,7 @@ void GodoukenTranslator::evaluate(nlohmann::json &p_script_json, const String &p
 				member_data->member_type = 0;
 				member_data->member_line = script->get_member_line(property_name);
 				member_data->member_property_info = property_info;
-				if (member_data->member_line < 4294967295) {
+				if (member_data->member_line < index_max) {
 					script_members_to_line[property_name] = member_data;
 				}
 			}
@@ -377,7 +406,7 @@ void GodoukenTranslator::evaluate(nlohmann::json &p_script_json, const String &p
 				member_data->member_type = 1;
 				member_data->member_line = script->get_member_line(method_name);
 				member_data->member_method_info = method_info;
-				if (member_data->member_line < 4294967295) {
+				if (member_data->member_line < index_max) {
 					script_members_to_line[method_name] = member_data;
 				}
 			}
@@ -392,7 +421,7 @@ void GodoukenTranslator::evaluate(nlohmann::json &p_script_json, const String &p
 				member_data->member_type = 2;
 				member_data->member_line = script->get_member_line(signal_name);
 				member_data->member_method_info = signal_info;
-				if (member_data->member_line < 4294967295) {
+				if (member_data->member_line < index_max) {
 					script_members_to_line[signal_name] = member_data;
 				}
 			}

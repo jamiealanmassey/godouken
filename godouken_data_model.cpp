@@ -12,6 +12,7 @@
 #include <cwctype>
 
 #include "godouken_script_translator.h"
+#include "modules/regex/regex.h"
 
 #include "stencils/godouken_stencil_class_sidebar.h"
 #include "stencils/godouken_stencil_class.h"
@@ -107,7 +108,7 @@ void GodoukenDataModel::data() {
 	Vector<nlohmann::json> directories_json;
 	Vector<GodoukenDirEntry *> dir_evaluation;
 	dir_evaluation.push_back(root_dir);
-	while (dir_evaluation.size() > 0) {
+	while (!dir_evaluation.empty()) {
 		GodoukenDirEntry *directory_info = dir_evaluation[0];
 		nlohmann::json directory_json = nlohmann::json::object();
 		directory_json["entries"]["dirs"] = nlohmann::json::array();
@@ -149,29 +150,15 @@ void GodoukenDataModel::data() {
 			dir_evaluation.push_back(directory_info->dir_children[i]);
 		}
 
-		/*GodoukenDirEntry *node_current = directory_info;
-		List<nlohmann::json> breadcrumbs_json;
-		do {
-			nlohmann::json breadcrumb = nlohmann::json::object();
-			breadcrumb["name"] = node_current->dir_name.utf8();
-			breadcrumb["url"] = tree_breadcrumb_html(node_current).utf8();
-			breadcrumbs_json.push_back(breadcrumb);
-			node_current = node_current->dir_parent;
-		} while (node_current);
-
-		breadcrumbs_json.invert();
-		for (uint32_t i = 0; i < breadcrumbs_json.size(); i++) {
-			directory_json["breadcrumbs"].push_back(breadcrumbs_json[i]);
-		}*/
-
+		String project_title = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String();
+		directory_json["project"]["title"] = project_title.capitalize().utf8();
+		
 		tree_breadcrumb_json(directory_info, directory_json);
 		directories_json.push_back(directory_json);
 		dir_evaluation.remove(0);
 	}
 
 	for (uint32_t i = 0; i < directories_json.size(); i++) {
-		//directories_json[i]["data"]["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().utf8();
-		
 		inja::Environment env;
 		const std::string result = env.render(godouken_stencil_directory, directories_json[i]);
 		const std::string name = directories_json[i]["url"].get<std::string>();
@@ -189,15 +176,87 @@ void GodoukenDataModel::data() {
 	}
 
 	// EVALUATE GD SCRIPT FILES AND EXTRACT JSON
+	Map<StringName, GodoukenGraphEntry *> model_graph;
 	for (uint32_t i = 0; i < directories_scripts.size(); i++) {
 		GodoukenTranslator *godouken_translator = memnew(GodoukenTranslator);
 		GodoukenDataEntry *directory_script = directories_scripts[i];
 		godouken_model.insert(directory_script->data_name, directory_script);
-		godouken_translator->evaluate(godouken_model[directory_script->data_name]->data_json, directory_script->data_file, directory_script->data_directory);
-		godouken_model[directory_script->data_name]->data_json["data"]["script"]["name_html"] = directory_script->data_name.utf8();
+		godouken_translator->evaluate(directory_script->data_json, directory_script->data_file, directory_script->data_directory);
+		directory_script->data_json["data"]["script"]["name_html"] = directory_script->data_name.utf8();
+
+		RegEx expr("\[^a-zA-Z0-9]");
+		const String &script_name_dt_dirty = directory_script->data_json["data"]["script"]["name_html"].get<std::string>().c_str();
+		const String &script_name_dt = expr.sub(script_name_dt_dirty, " ", true).capitalize().replace(" ", "");
+		directory_script->data_json["data"]["script"]["name_clean"] = script_name_dt.utf8();
+		if (!model_graph.has(script_name_dt)) {
+			model_graph.insert(script_name_dt, new GodoukenGraphEntry());
+		}
+
+		model_graph[script_name_dt]->graph_data = directory_script;
+		const String &base_name_dirty = directory_script->data_json["data"]["script"]["base"]["name"].get<std::string>().c_str();
+		const String &base_name = expr.sub(base_name_dirty, " ", true).capitalize().replace(" ", "");
+		if (!base_name.empty()) {
+			model_graph[script_name_dt]->graph_superclass = base_name;
+			if (!model_graph.has(base_name)) {
+				model_graph.insert(base_name, new GodoukenGraphEntry());
+			}
+			
+			if (!model_graph[base_name]->graph_subclasses.find(script_name_dt)) {
+				model_graph[base_name]->graph_subclasses.push_back(script_name_dt);
+			}
+		}
+		
 		memdelete(godouken_translator);
 	}
+	
+	// Create inheritance tree
+	for (uint32_t i = 0; i < directories_scripts.size(); i++) {
+		GodoukenDataEntry *directory_script = directories_scripts[i];
+		const String &script_name_dt = directory_script->data_json["data"]["script"]["name_clean"].get<std::string>().c_str();
+		const GodoukenGraphEntry *entry_current = model_graph[script_name_dt];
+		const GodoukenGraphEntry *entry_superclass = model_graph[entry_current->graph_superclass];
+		const String &script_style_normal = ":::styleN";
+		const String &script_style_super = entry_superclass && !entry_superclass->graph_data ? ":::styleG" : script_style_normal;
+		
+		StringBuilder script_graph_str;
+		script_graph_str.append("\ngraph LR");
+		script_graph_str.append("\n\t" + entry_current->graph_superclass + "[" + entry_current->graph_superclass + "]" + script_style_super);
+		script_graph_str.append(" --> ");
+		script_graph_str.append(script_name_dt + ":::styleC;");
 
+		const String &class_html = "./" + entry_current->graph_data->data_name.replace(" ", "_") + ".html";
+		script_graph_str.append("\n\tclick " + script_name_dt);
+		script_graph_str.append(" href \"" + class_html + "\";");
+
+		if (entry_superclass) {
+			String subclass_html = "";
+			if (entry_superclass->graph_data) {
+				subclass_html = "\"./" + entry_superclass->graph_data->data_name.replace(" ", "_") + ".html\"";
+			}
+			else {
+				subclass_html = "\"https://docs.godotengine.org/en/stable/classes/class_" + entry_current->graph_superclass.to_lower() + ".html\" _blank";
+			}
+			
+			script_graph_str.append("\n\tclick " + entry_current->graph_superclass);
+			script_graph_str.append(" href " + subclass_html + ";");
+		}
+		
+		for (uint32_t x = 0; x < entry_current->graph_subclasses.size(); x++) {
+			const String &graph_subclass = entry_current->graph_subclasses[x];
+			const String &graph_html = "./" + model_graph[graph_subclass]->graph_data->data_name.replace(" ", "_") + ".html";
+			script_graph_str.append("\n\t" + script_name_dt);
+			script_graph_str.append(" --> ");
+			script_graph_str.append(graph_subclass + script_style_normal + ";");
+			script_graph_str.append("\n\tclick " + graph_subclass);
+			script_graph_str.append(" href \"" + graph_html + "\";");
+		}
+		
+		script_graph_str.append("\n\tclassDef styleG fill:#478CBF,stroke:#111,stroke-width:3px,font-size:0.96em,color:#FFF;");
+		script_graph_str.append("\n\tclassDef styleC fill:#FF9933,stroke:#111,stroke-width:3px,font-size:0.96em,color:#FFF;");
+		script_graph_str.append("\n\tclassDef styleN fill:#FFFFFF,stroke:#111,stroke-width:3px,font-size:0.96em;\n");
+		directory_script->data_json["data"]["script"]["diagram"] = script_graph_str.as_string().utf8();
+	}
+	
 	nlohmann::json sidebar_json = nlohmann::json::object();
 	sidebar_json["data"]["scripts"] = nlohmann::json::array();
 	for (Map<String, GodoukenDataEntry*>::Element *E = godouken_model.front(); E; E = E->next()) {
@@ -206,17 +265,17 @@ void GodoukenDataModel::data() {
 		GodoukenDataEntry *script_entry = E->value();
 		script_entry->data_json["data"]["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().capitalize().utf8();
 		script_entry->data_json["data"]["script"]["breadcrumbs"] = nlohmann::json::array();
-		if (script_entry->data_json["data"]["script"]["name_sm"] != "") {
+		if (!script_entry->data_json["data"]["script"]["name_sm"].empty()) {
 			tree_breadcrumb_json(script_entry->data_parent_dir, script_entry->data_json["data"]["script"]);
 			nlohmann::json breadcrumb_script;
 			String name_html = script_entry->data_json["data"]["script"]["name_html"].get<std::string>().c_str();
 			breadcrumb_script["name"] = (name_html + ".gd").utf8();
 			breadcrumb_script["url"] = "";
 			script_entry->data_json["data"]["script"]["breadcrumbs"].push_back(breadcrumb_script);
-			script_entry->data_json["data"]["script"]["breadcrumbs"][0]["url"] = ".html";
+			script_entry->data_json["data"]["script"]["breadcrumbs"][0]["url"] = "..html";
 			
 			nlohmann::json sidebar_entry;
-			sidebar_entry["name_fl"] = script_entry->data_json["data"]["script"]["name"];
+			sidebar_entry["name_clean"] = script_entry->data_json["data"]["script"]["name_clean"];
 			sidebar_entry["name_html"] = script_entry->data_json["data"]["script"]["name_html"];
 			sidebar_json["data"]["scripts"].push_back(sidebar_entry);
 		}
@@ -268,7 +327,7 @@ void GodoukenDataModel::data() {
 
 void GodoukenDataModel::tree_indexer(GodoukenDirEntry *p_node, Vector<String> p_breadcrumbs) {
 	GodoukenDirEntry *dir_entry = p_node;
-	while (p_breadcrumbs.size() > 0) {
+	while (!p_breadcrumbs.empty()) {
 		if (p_breadcrumbs[0] != "") {
 			GodoukenDirEntry *dir_found_entry = dir_entry;
 			bool dir_is_found = false;
@@ -304,7 +363,7 @@ void GodoukenDataModel::tree_indexer(GodoukenDirEntry *p_node, Vector<String> p_
 void GodoukenDataModel::tree_indexer(GodoukenDirEntry *p_node, Vector<String> p_breadcrumbs, GodoukenDataEntry *p_data_entry, bool &p_success) {
 	p_success = false;
 	GodoukenDirEntry *dir_entry = p_node;
-	while (p_breadcrumbs.size() > 0) {
+	while (!p_breadcrumbs.empty()) {
 		GodoukenDirEntry *dir_found_entry = dir_entry;
 		bool dir_is_found = false;
 		for (uint32_t i = 0; i < dir_entry->dir_children.size(); i++) {
@@ -320,7 +379,7 @@ void GodoukenDataModel::tree_indexer(GodoukenDirEntry *p_node, Vector<String> p_
 		}
 
 		p_breadcrumbs.remove(0);
-		if (p_breadcrumbs.size() == 0) {
+		if (p_breadcrumbs.empty()) {
 			dir_entry->dir_files.push_back(p_data_entry);
 			p_data_entry->data_parent_dir = dir_entry;
 			p_success = true;

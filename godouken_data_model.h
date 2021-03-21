@@ -40,6 +40,16 @@ struct GodoukenDirEntry {
 	}
 };
 
+struct GodoukenGraphEntry {
+	String graph_superclass;
+	List<String> graph_subclasses;
+	GodoukenDataEntry *graph_data;
+
+	GodoukenGraphEntry() {
+		graph_data = nullptr;
+	}
+};
+
 class GodoukenDataModel : public Object {
     GDCLASS(GodoukenDataModel, Object);
 
