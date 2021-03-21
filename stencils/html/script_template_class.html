@@ -124,7 +124,7 @@
 												{% endif %}
 											</td>
 											<td>
-												<a href="#{{ property.name }}">{{ property.name }}</a>
+												<a href="#{{ property.name }}" onclick="seekAnim('#{{ property.name }}');">{{ property.name }}</a>
 											</td>
 											{% if property.tags %}
 											<td>
@@ -173,7 +173,7 @@
 												{% endif %}
 											</td>
 											<td>
-												<a href="#{{ method.name }}">{{ method.name }}</a> 
+												<a href="#{{ method.name }}" onclick="seekAnim('#{{ method.name }}');">{{ method.name }}</a> 
 												{% if length(method.parameters) > 0 %}
 												 ( 
 												{% for parameter in method.parameters %}
@@ -302,7 +302,7 @@
 											<span class="special-2"><i><strong>See Also</strong></i></span>
 											<div>
 												{% for item in method.see %}
-												<a href="#{{ item }}">{{ item }}</a>&nbsp;
+												<a href="#{{ item }}" onclick="seekAnim('#{{ item }}');">{{ item }}</a>&nbsp;
 												{% endfor %}
 											</div>
 										</div>
@@ -340,12 +340,28 @@
 		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-		{% if data.script.diagram != "" %}
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha512-z4OUqw38qNLpn1libAN9BsoDx6nbNFio5lA6CuTp9NlK83b89hgyCVq+N5FdBJptINztxn1Z3SaKSKUS5UP60Q==" crossorigin="anonymous"></script>
+		<script>
+			function seekAnim(elemId) {
+				anime({
+					targets:elemId,
+					translateX:25,
+					loop:2,
+					direction:'alternate',
+					duration:250,
+					easing:'easeInOutCubic'
+				});
+			}
+		</script>
+		{% if data.script.diagram != "" %}
 		<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
  		<script>
 			mermaid.initialize({startOnLoad:true});
-			anime({targets:'#content-script-tree',opacity:1,duration:10000});
+			anime({
+				targets:'#content-script-tree',
+				opacity:1,
+				duration:10000
+			});
 		</script>
 		{% endif %}
 	</body>
