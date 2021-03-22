@@ -24,6 +24,7 @@ Phase #2:
         ☐ Add return to top of page button to every page in bottom right
         ☐ Add reference manual page for the tool
         ☐ Add ability to 'See Also' on Script + Functions inside of them
+        ☐ Fix bug where version shows up in scripts where it isn't set
     C++ Backend:
         ☐ Add ability to filter out certain directories
         ☐ Add project JSON data into single JSON object injected into other objects

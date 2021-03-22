@@ -55,7 +55,7 @@
 									<div class="widget bg-dark rounded-right mx-0">{{ data.script.meta.deprecated }}</div>
 								</div>
 								{% endif %}
-								{% if data.script.meta.version != 0 %}
+								{% if data.script.meta.version != "" %}
 								<div class="ml-2 d-flex text-white">
 									<span class="widget bg-info rounded-left mx-0">version</span>
 									<span class="widget bg-dark rounded-right mx-0">{{ data.script.meta.version }}</span>
@@ -149,7 +149,6 @@
 							</div>
 						</div>
 						{% endif %}
-
 						{% if length(data.script.methods) > 0 %}
 						<div id="content-main-body" class="container my-3">
 							<div class="row">
@@ -207,7 +206,6 @@
 							</div>
 						</div>
 						{% endif %}
-
 						{% if length(data.script.properties) > 0 %}
 						<div id="content-main-body-detailed" class="container my-3">
 							<div class="row mt-3">
@@ -273,13 +271,13 @@
 										{% if method.description.brief != "" %}
 										<div class="row ml-2 mt-2 d-flex flex-column">
 											<span class="special-2"><i><strong>Brief Description</strong></i></span>
-											<div><i>{{ method.description.brief }}</i></div>
+											<div>{{ method.description.brief }}</div>
 										</div>
 										{% endif %}
 										{% if method.description.detailed != "" %}
 										<div class="row ml-2 mt-2 d-flex flex-column">
 											<span class="special-2"><i><strong>Detailed Description</strong></i></span>
-											<div><i>{{ method.description.detailed }}</i></div>
+											<div>{{ method.description.detailed }}</div>
 										</div>
 										{% endif %}
 										{% if length(method.parameters) > 0 %}
@@ -292,7 +290,7 @@
 													{{ param.name }}
 													{% else %} 
 													{{ loop.index }}
-													{% endif %} - {{ param.description }}
+													{% endif %} :: {{ param.description }}
 												</div>
 												{% endif %}
 											{% endfor %}
@@ -301,7 +299,7 @@
 										{% if method.return.description != "" %}
 										<div class="row ml-2 mt-2 d-flex flex-column">
 											<span class="special-2"><i><strong>Return Value</strong></i></span>
-											<div><i>{{ method.return.description }}</i></div>
+											<div>{{ method.return.description }}</div>
 										</div>
 										{% endif %}
 										{% if length(method.see) > 0 %}
