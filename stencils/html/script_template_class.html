@@ -260,11 +260,11 @@
 											{% endif %}
 											&nbsp;{{ method.name }}
 											{% if length(method.parameters) > 0 %}
-												( 
+											( 
 											{% for parameter in method.parameters %}
-											<a href="{{ parameter.type_info.href }}"  target="blank">{{ parameter.type_info.name }}</a> {{ parameter.name }}{% if not loop.is_last and length(method.parameters) > 1 %}, {% endif %}
+											<a href="{{ parameter.type_info.href }}"  target="blank">{{ parameter.type_info.name }}</a> {{ parameter.name }}{% if not loop.is_last and length(method.parameters) > 1 %}, {% else %}&nbsp;{% endif %}
 											{% endfor %}
-												) 
+											) 
 											{% else %}
 											( ) 
 											{% endif %}
@@ -282,19 +282,26 @@
 											<div><i>{{ method.description.detailed }}</i></div>
 										</div>
 										{% endif %}
+										{% if length(method.parameters) > 0 %}
+										<div class="row ml-2 mt-2 d-flex flex-column">
+											<span class="special-2"><i><strong>Parameters</strong></i></span>
+											{% for param in method.parameters %}
+												{% if param.description != "" %}
+												<div>
+													{% if param.name != "" %}
+													{{ param.name }}
+													{% else %} 
+													{{ loop.index }}
+													{% endif %} - {{ param.description }}
+												</div>
+												{% endif %}
+											{% endfor %}
+										</div>
+										{% endif %}
 										{% if method.return.description != "" %}
 										<div class="row ml-2 mt-2 d-flex flex-column">
 											<span class="special-2"><i><strong>Return Value</strong></i></span>
 											<div><i>{{ method.return.description }}</i></div>
-										</div>
-										{% endif %}
-										{% if length(method.parameters) > 0 %}
-										<div class="row ml-2 mt-2 d-flex flex-column">
-											{% for param in method.parameters %}
-												{% if param.description != "" %}
-												<div>{{ loop.index }} - {{ param.description }}</div>
-												{% endif %}
-											{% endfor %}
 										</div>
 										{% endif %}
 										{% if length(method.see) > 0 %}

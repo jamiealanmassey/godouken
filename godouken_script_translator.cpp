@@ -53,7 +53,8 @@ void GodoukenScriptTranslatorCommentParser::parse(const Vector<String> &p_lines,
 				const int32_t brace_0 = line.find_char('[', find_at);
 				const int32_t brace_1 = line.find_char(']', brace_0);
 				if (brace_0 > 0 && brace_1 > 0) {
-					comment_selector = line.substr(brace_1 - brace_0).strip_edges();
+					comment_selector = line.substr(brace_0 + 1, brace_1 - brace_0 - 1).strip_edges();
+					comment_keyword = comment_keyword.substr(0, comment_keyword.find("["));
 				}
 
 				GodoukenScriptTranslatorCommentData *comment_data = memnew(GodoukenScriptTranslatorCommentData);
@@ -264,12 +265,18 @@ void GodoukenTranslator::evaluate_method(nlohmann::json &p_script_json, const Me
 		method_parameter_json["type_info"]["name"] = type_arg_name.utf8();
 		method_parameter_json["type_info"]["href"] = type_arg_href.utf8();
 
-		for (int32_t i = 0; i < comment_args_set.size(); i++) {
+		if (x < comment_args_set.size()) {
+			const String &comment_selector = comment_args_set[x]->comment_selector;
+			method_parameter_json["description"] = comment_args_set[x]->comment_body.utf8();
+			method_parameter_json["name"] = !comment_selector.empty() ? comment_selector.utf8() : std::to_string(x).c_str();
+		}
+		
+		/*for (int32_t i = 0; i < comment_args_set.size(); i++) {
 			if (p_method_info.arguments[x].name.find(comment_args_set[i]->comment_selector) == 0) {
 				method_parameter_json["description"] = comment_args_set[i]->comment_body.utf8();
 				break;
 			}
-		}
+		}*/
 
 		method_json["parameters"].push_back(method_parameter_json);
 	}

@@ -7,7 +7,7 @@ Phase #1:
         ✔ Create breadcrumbs for each script (which link to directory listings) @done(21-03-20 21:02)
         ✔ Fix issue where method params don't open Godot docs in new tab @done(21-03-20 21:25)
     C++ Backend:
-        ☐ Add mapping of variable position in list to description
+        ✔ Add mapping of variable position in list to description @done(21-03-22 00:46)
         ✔ Add directory mappings that list out all relevant scripts (which update at each gen) @done(21-03-20 18:37)
         ✔ Add directory links to breadcrumbs @done(21-03-20 20:46)
         ☐ Add index html that lists all the classes in the project
