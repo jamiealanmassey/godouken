@@ -17,6 +17,7 @@
 #include "stencils/godouken_stencil_class_sidebar.h"
 #include "stencils/godouken_stencil_class.h"
 #include "stencils/godouken_stencil_directory.h"
+#include "stencils/godouken_stencil_index.h"
 #include "stencils/godouken_stencil_style.h"
 
 Vector<String> extract_breadcrumbs(const String &p_directory_path) {
@@ -107,6 +108,7 @@ void GodoukenDataModel::data() {
 	// CREATE DIRECTORY LISTINGS
 	Vector<nlohmann::json> directories_json;
 	Vector<GodoukenDirEntry *> dir_evaluation;
+	Map<String, nlohmann::json> dir_alpha_global;
 	dir_evaluation.push_back(root_dir);
 	while (!dir_evaluation.empty()) {
 		GodoukenDirEntry *directory_info = dir_evaluation[0];
@@ -126,9 +128,13 @@ void GodoukenDataModel::data() {
 		Map<String, nlohmann::json> directory_alpha_jsons;
 		for (uint32_t i = 0; i < directory_info->dir_files.size(); i++) {
 			GodoukenDataEntry *dir_data_entry = directory_info->dir_files[i];
-			String alpha = dir_data_entry->data_name.substr(0, 1);
+			String alpha = dir_data_entry->data_name.substr(0, 1).to_lower();
 			if (!directory_alpha_jsons.has(alpha)) {
 				directory_alpha_jsons.insert(alpha, nlohmann::json::array());
+			}
+
+			if (!dir_alpha_global.has(alpha)) {
+				dir_alpha_global.insert(alpha, nlohmann::json::array());
 			}
 			
 			nlohmann::json directory_child = nlohmann::json::object();
@@ -137,6 +143,7 @@ void GodoukenDataModel::data() {
 			directory_child["name_html"] = dir_data_entry->data_name.utf8();
 			directory_child["path"] = dir_data_entry->data_directory.utf8();
 			directory_alpha_jsons[alpha].push_back(directory_child);
+			dir_alpha_global[alpha].push_back(directory_child);
 		}
 
 		for (Map<String, nlohmann::json>::Element *E = directory_alpha_jsons.front(); E; E = E->next()) {
@@ -158,6 +165,30 @@ void GodoukenDataModel::data() {
 		dir_evaluation.remove(0);
 	}
 
+	nlohmann::json index_json = nlohmann::json::object();
+	index_json["entries"]["abc"] = nlohmann::json::array();
+	index_json["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().capitalize().utf8();
+	for (Map<String, nlohmann::json>::Element *E = dir_alpha_global.front(); E; E = E->next()) {
+		nlohmann::json entry_json = nlohmann::json();
+		entry_json["alpha"] = E->key().to_upper().utf8();
+		entry_json["files"] = E->value();
+		index_json["entries"]["abc"].push_back(entry_json);
+	}
+
+	inja::Environment env_index;
+	const std::string result = env_index.render(godouken_stencil_index, index_json);
+	const String &dir_index = "res://docs/html/";
+	dir->change_dir(dir_index);
+	if (!dir->dir_exists(dir_index)) {
+		dir->make_dir_recursive(dir_index);
+	}
+	
+	FileAccess *file = FileAccess::create(FileAccess::AccessType::ACCESS_RESOURCES);
+	file->reopen(dir_index + "index.html", FileAccess::WRITE);
+	file->store_string(result.c_str());
+	file->close();
+	memdelete(file);
+	
 	for (uint32_t i = 0; i < directories_json.size(); i++) {
 		inja::Environment env;
 		const std::string result = env.render(godouken_stencil_directory, directories_json[i]);

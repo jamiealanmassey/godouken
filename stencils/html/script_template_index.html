@@ -1,9 +1,9 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>{{ project.title }}</title>
+		<title>{{ project.title }} :: Project Index</title>
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-		<link rel="stylesheet" href="./../../css/main.css">
+		<link rel="stylesheet" href="./../css/main.css">
 	</head>
 	<body>
 		<div class="container-fluid h-100" id="main-content">
@@ -17,50 +17,29 @@
 						</div>
 					</div>
 					<div id="sidebar" class="container-fluid p-0 scroll-y h-100">
-						<iframe src="./../generic/sidebar.html" class="scroll-y" width="100%" height="100%" style="border: 0;"></iframe>
+						<iframe src="generic/sidebar.html" class="scroll-y" width="100%" height="100%" style="border: 0;"></iframe>
 					</div>
 				</div>
 				<div class="col-10 h-100 d-flex flex-column scroll-y">
 					<div class="my-3">
-						{% if length(breadcrumbs) > 0 %}
-						<nav aria-label="breadcrumb">
-							<ol class="breadcrumb">
-							{% for crumb in breadcrumbs %}
-							<li class="breadcrumb-item"><a href="{{ crumb.url }}">{{ crumb.name }}</a></li>
-							{% endfor %}
-							</ol>
-						</nav>
-						{% endif %}
 						<div class="container mt-5 text-left">
-							{% if length(entries.dirs) > 0 %}
-							<div class="row">
-								<div class="col">
-									<h3><b>Directories</b></h3>
-								</div>
-							</div>
-							<div class="row mb-5">
-								<div class="col">
-									{% for dir in entries.dirs %}
-									<div><a href="{{ dir.url }}">{{ dir.name }}</a></div>
-									{% endfor %}
-								</div>
-							</div>
-							{% endif %}
 							{% if length(entries.abc) > 0 %}
+							<div class="row my-5">
+								<h2 class="text-muted"><b>Project Index</b></h2>
+							</div>
 							<div class="row">
 								{% for container in entries.abc %}
 								<div class="col-xs-12 col-md-6 col-lg-4 mb-3">
 									<h3><b>{{ container.alpha }}</b></h3>
 									{% for entry in container.files %}
-									<div><a href="../{{ entry.name_html }}.html">{{ entry.name }}</a></div>
+									<div><a href="./{{ entry.name_html }}.html">{{ entry.name }}</a></div>
 									{% endfor %}
 								</div>
 								{% endfor %}
 							</div>
-							{% endif %}
-							{% if length(entries.dirs) == 0 and length(entries.abc) == 0 %}
-							<div class="row mt-4 justify-content-center">
-								<h2 class="text-muted"><b>There are no directories or files to show</b></h2>
+							{% else %}
+							<div class="row my-5 justify-content-center">
+								<h2 class="text-muted"><b>There are no scripts in your project</b></h2>
 							</div>
 							{% endif %}
 						</div>

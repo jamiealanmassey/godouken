@@ -10,7 +10,7 @@ Phase #1:
         ✔ Add mapping of variable position in list to description @done(21-03-22 00:46)
         ✔ Add directory mappings that list out all relevant scripts (which update at each gen) @done(21-03-20 18:37)
         ✔ Add directory links to breadcrumbs @done(21-03-20 20:46)
-        ☐ Add index html that lists all the classes in the project
+        ✔ Add index html that lists all the classes in the project @done(21-03-25 21:31)
         ✔ Add logic portion of the Script Inheritance Tree @done(21-03-21 22:58)
             ✔ Construct the tree visuals component @done(21-03-21 17:32)
             ✔ Construct the related JSON data to each script @done(21-03-21 22:58)
@@ -24,7 +24,7 @@ Phase #2:
         ☐ Add return to top of page button to every page in bottom right
         ☐ Add reference manual page for the tool
         ☐ Add ability to 'See Also' on Script + Functions inside of them
-        ☐ Fix bug where version shows up in scripts where it isn't set
+        ✔ Fix bug where version shows up in scripts where it isn't set @done(21-03-22 01:36)
     C++ Backend:
         ☐ Add ability to filter out certain directories
         ☐ Add project JSON data into single JSON object injected into other objects
@@ -32,5 +32,7 @@ Phase #2:
         ☐ Cleanup GodoukenDataModel class into clear functions
         ☐ Add concepts of collections by create a related set
         ☐ Add option in settings to turn reference manual on/off when generating
+        ☐ Add settings to the Godot settings menu for Godouken
+        ☐ Add directive 'type' which can be used to hint the documentation towards a specific type 
     Misc:
-        ☐ Pass over all GDScript files and make sure they conform to standard
+        ✔ Pass over all GDScript files and make sure they conform to standard @done(21-03-22 01:38)

@@ -1,5 +1,6 @@
 <html>
     <head>
+        <title>Project Index</title>
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 		<link rel="stylesheet" href="./../../css/main.css">
 	</head>
@@ -7,6 +8,7 @@
         <div id="sidebar-nav" class="h-100 scroll-y">
             <ul id="sidebar" class="h-100  scroll-y">
                 <li class="tree-item-heading">OVERVIEW</li>
+                <li class="tree-item"><a href="#" onclick="set_location('index');">Project Index</a></li>
                 <!--<li class="tree-item"><a href="#">Introduction</a></li>
                 <li class="tree-item"><a href="#">Project Graph</a></li>
                 <li class="tree-item"><a href="#">About</a></li>
@@ -20,7 +22,7 @@
                 <li class="tree-item-heading">SCRIPT API</li>
                 {% for entry in data.scripts %}
                 <li class="tree-item">
-                    <a href="#" onclick="set_location('{{ entry.name_html }}')">{{ entry.name_clean }}</a>
+                    <a href="#" onclick="set_location('{{ entry.name_html }}');">{{ entry.name_clean }}</a>
                 </li>
                 {% endfor %}
             </ul>

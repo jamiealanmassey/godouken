@@ -270,13 +270,6 @@ void GodoukenTranslator::evaluate_method(nlohmann::json &p_script_json, const Me
 			method_parameter_json["description"] = comment_args_set[x]->comment_body.utf8();
 			method_parameter_json["name"] = !comment_selector.empty() ? comment_selector.utf8() : std::to_string(x).c_str();
 		}
-		
-		/*for (int32_t i = 0; i < comment_args_set.size(); i++) {
-			if (p_method_info.arguments[x].name.find(comment_args_set[i]->comment_selector) == 0) {
-				method_parameter_json["description"] = comment_args_set[i]->comment_body.utf8();
-				break;
-			}
-		}*/
 
 		method_json["parameters"].push_back(method_parameter_json);
 	}
