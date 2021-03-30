@@ -33,6 +33,6 @@ Phase #2:
         ✔ Add settings to the Godot settings menu for Godouken @done(21-03-30 07:28)
         ☐ Add directive 'type' which can be used to hint the documentation towards a specific type 
         ☐ Add lunrjs to client-side 
-        ☐ Cleanup GodoukenDataModel class into clear functions
+        ✔ Cleanup GodoukenDataModel class into clear functions @done(21-03-30 13:20)
     Misc:
         ✔ Pass over all GDScript files and make sure they conform to standard @done(21-03-22 01:38)

@@ -24,14 +24,9 @@ void GodoukenEditorPane::_on_pressed_test() {
 #endif // GODOUKEN_TEST
 
 void GodoukenEditorPane::_on_pressed_generate() {
-	nlohmann::json script_result = nlohmann::json::object();
-	GodoukenTranslator *godouken_translator = memnew(GodoukenTranslator);
-	godouken_translator->evaluate(script_result, "humanoid.gd", "res://assets/entities/_base/");
-	script_result["data"]["project_title"] = "";
-	script_result["data"]["script"]["breadcrumbs"] = nlohmann::json::array();
-
 	GodoukenDataModel *godouken_data_model = memnew(GodoukenDataModel);
-	godouken_data_model->data();
+	godouken_data_model->generate();
+	memdelete(godouken_data_model);
 }
 
 void GodoukenEditorPane::_on_pressed_clean() {

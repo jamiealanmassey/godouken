@@ -42,8 +42,8 @@ void register_godouken_types() {
 	EditorNode::add_plugin_init_callback(_initiialise_editor_pane);
 #endif
 
-	if (!ProjectSettings::get_singleton()->has_setting("godouken/config/website")) {
-		ProjectSettings::get_singleton()->set_setting("godouken/config/website", "");
+	if (!ProjectSettings::get_singleton()->has_setting("godouken/config/docs_path")) {
+		ProjectSettings::get_singleton()->set_setting("godouken/config/docs_path", "res://docs");
 	}
 
 	if (!ProjectSettings::get_singleton()->has_setting("godouken/config/include_reference")) {

@@ -55,13 +55,38 @@ class GodoukenDataModel : public Object {
 
 protected:
 	bool model_compiling;
-    uint32_t model_script_hash;
-    GodoukenDataNodeBase *model_node_root;
-
+	
+	Map<String, GodoukenDataEntry *> model_data;
+	Map<StringName, GodoukenGraphEntry *> model_graph;
+	Vector<GodoukenDataEntry *> model_directory_scripts;
+	
+	String path;
+	String path_css;
+	String path_html;
+	String path_html_dirs;
+	String path_html_generic;
+	
+private:
+	static const String &extract_breadcrumb_html(const String &p_directory_path);
+	static Vector<String> extract_breadcrumbs(const String &p_directory_path);
+	static void extract_breadcrumbs(const String &p_directory_path, nlohmann::json &p_breadcrumbs_json);
+	static bool contains(const PoolStringArray &p_array, const String &p_element);
+	
+	void evaluate_directories(GodoukenDirEntry *p_root_dir, const PoolStringArray &p_excluded) const;
+	void evaluate_files(GodoukenDirEntry *p_root_dir, const PoolStringArray &p_excluded);
+	void evaluate_scripts();
+	
+	void create_directory_listings(GodoukenDirEntry *p_root_dir) const;
+	void create_inheritance_trees();
+	
+	void create_script_pages() const;
+	void create_reference_page() const;
+	void create_styles() const;
+	
+	static void create_file(const String &p_dir, const String &p_name, const std::string &p_template, const nlohmann::json &p_template_json);
+	
 public:
-	void data();
-
-	Map<String, GodoukenDataEntry *> godouken_model;
+	void generate();
 
 protected:
 	static void tree_indexer(GodoukenDirEntry *p_node, Vector<String> p_breadcrumbs);
