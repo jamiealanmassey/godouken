@@ -1,0 +1,210 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>{{ project.title }} :: Godouken Reference Manual</title>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<link rel="stylesheet" href="./../css/main.css">
+	</head>
+	<body>
+		<div class="container-fluid h-100" id="main-content">
+			<div class="row h-100">
+				<div class="col-2 h-100 d-flex flex-column p-0" id="sidebar">
+					<div id="logo-container" class="container-fluid p-1">
+						<div class="mb-2">
+							<div class="mt-3 text-center">
+								<strong class="project-header border-bottom">{{ project.title }}</strong>
+							</div>
+						</div>
+					</div>
+					<div id="sidebar" class="container-fluid p-0 scroll-y h-100">
+						<iframe src="generic/sidebar.html" class="scroll-y" width="100%" height="100%" style="border: 0;"></iframe>
+					</div>
+				</div>
+				<div class="col-10 h-100 d-flex flex-column scroll-y">
+					<div class="my-3">
+						<div class="container my-5 text-left border">
+							<div class="row mt-2">
+								<div class="col">
+									<h1 class="text-uppercase"><b>Godouken Reference Manual</b></h1>
+								</div>
+							</div>
+							<div class="row mt-4">
+								<div class="col">
+									<h2>Godouken Mission Statement</h2>
+									<h4 class="mt-4 p-3 border text-uppercase">Godouken is a lightweight, non-intrusive and integrated <a href="https://docs.godotengine.org/en/stable/getting_started/scripting/gdscript/gdscript_basics.html">GDScript</a> API documentation tool for all your 
+										<a href="https://godotengine.org/">Godot</a> projects. The aim of the project is to make sharing documentation for your games as simple as possible, increasing the productivity of teams, and/or to serve as a reference for the single programmer.</h4>
+								</div>
+							</div>
+							<div class="row mt-2">
+								<div class="col">
+									<h2>Godouken Project Settings</h2>
+									<h5 class="mt-3 p-3 border font-italic">There are Godouken specific settings which you can find and access in the `general` tab of the Godot Project Settings dialog!</h5>
+									<table class="my-4 border w-100">
+										<tr>
+											<td class="px-3 border-right"><b>Include Reference</b></td>
+											<td class="px-3">Toggles the generation of this reference manual in your docs</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>Include Console Suggestions</b></td>
+											<td class="px-3">The output of the Godouken console log will make documentation suggestions</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>Exclude Directories</b></td>
+											<td class="px-3">The given list of project directories will be ignored in generation</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+							<div class="row mt-2">
+								<div class="col">
+									<h2>Godouken Directives</h2>
+								</div>
+							</div>
+							<div class="row mt-2">
+								<div class="col-lg-12 col-xl-6">
+									<table class="my-2 border w-100">
+										<tr>
+											<td class="px-3 border-bottom" colspan="2"><h5 class="mt-1 text-uppercase text-center"><b>Script Directives</b></h5></td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@name</b></td>
+											<td class="px-3">This is the desired name of your script</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@created</b></td>
+											<td class="px-3">The date at which the script was created</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@modified</b></td>
+											<td class="px-3">The date at which the script was modified</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@deprecated</b></td>
+											<td class="px-3">The date at which the script was deprecated</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@version</b></td>
+											<td class="px-3">The current version of the script</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@author</b></td>
+											<td class="px-3">The author(s) of the script</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@brief</b></td>
+											<td class="px-3">A brief description of what the script does</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@detailed</b></td>
+											<td class="px-3">A more detailed description of the script</td>
+										</tr>
+										
+									</table>
+								</div>
+								<div class="col-lg-12 col-xl-6">
+									<table class="my-2 border w-100">
+										<tr>
+											<td class="px-3 border-bottom" colspan="2"><h5 class="mt-1 text-uppercase text-center"><b>Method Directives</b></h5></td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@brief</b></td>
+											<td class="px-3">A brief description of what the method does</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@detailed</b></td>
+											<td class="px-3">A more detailed description of the method</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@parameter[name]</b></td>
+											<td class="px-3">Describe each parameter parameter</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@return</b></td>
+											<td class="px-3">Describe the returned variable</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@see</b></td>
+											<td class="px-3">Adds hyperlinks to other scripts/methods</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@warning</b></td>
+											<td class="px-3">Add warning note to this property</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@info</b></td>
+											<td class="px-3">Add info note to this property</td>
+										</tr>
+									</table>
+								</div>
+								<div class="col-lg-12 col-xl-6">
+									<table class="my-2 border w-100">
+										<tr>
+											<td class="px-3 border-bottom" colspan="2"><h5 class="mt-1 text-uppercase text-center"><b>Property Directives</b></h5></td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@brief</b></td>
+											<td class="px-3">A brief description of what the property is</td>
+										</tr>
+										<tr>
+											<td class="px-3 border-right"><b>@detailed</b></td>
+											<td class="px-3">A more detailed description of the property</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+							<div class="row mt-2">
+								<div class="col-12 mt-2">
+									<h2>Code Samples</h2>
+								</div>
+								<div class="col-12 mt-3">
+									<h5>Script Example</h5>
+									<code>
+										## @name     : The name of your script<br>
+										## @created  : The date the script was created [i.e. 01/01/1970]<br>
+										## @modified  : The date the script was modified [i.e. 01/01/1970]<br>
+										## @deprecated  : The date the script was deprecated [i.e. 01/01/1970]<br>
+										## @version  : The version of the script [i.e. 1]<br>
+										## @author   : The first author of the script<br>
+										## @author   : The second author of the script<br>
+										## @brief    : The brief description of this script<br>
+										## @detailed : The detailed description of this script<br>
+										extends Node2D<br>
+										...
+									</code>
+								</div>
+								<div class="col-12 mt-3">
+									<h5>Property Example</h5>
+									<code>
+										...<br>
+										## @brief    : Example of a brief description<br>
+										## @detailed : Example of a detailed description<br>
+										export(int) var example = 100<br>
+										...<br>
+									</code>
+								</div>
+								<div class="col-12 mt-3">
+									<h5>Property Example</h5>
+									<code>
+										...<br>
+										## @brief           : This is the brief comment for the method<br>
+										## @parameter[var1] : This will be the commment for variable at index 0<br>
+										## @parameter[var2] : This will be the commment for variable at index 1<br>
+										## @return          : This is the text that describes what the function returns (if anything)<br>
+										## @see             : another_method<br>
+										## @see             : another_script#another_method<br>
+										func some_method(var1, var2):<br>
+										&nbsp;&nbsp;&nbsp;&nbsp;pass<br>
+										...
+									</code>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	</body>
+</html>

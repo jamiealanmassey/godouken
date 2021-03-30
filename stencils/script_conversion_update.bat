@@ -2,4 +2,5 @@ start python script_conversion.py html/script_template_class .html godouken_sten
 start python script_conversion.py html/script_template_class_sidebar .html godouken_stencil_class_sidebar
 start python script_conversion.py html/script_template_directories .html godouken_stencil_directory
 start python script_conversion.py html/script_template_index .html godouken_stencil_index
+start python script_conversion.py html/script_template_reference .html godouken_stencil_reference
 start python script_conversion.py css/template_main .css godouken_stencil_style

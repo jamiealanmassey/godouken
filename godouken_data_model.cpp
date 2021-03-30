@@ -18,6 +18,7 @@
 #include "stencils/godouken_stencil_class.h"
 #include "stencils/godouken_stencil_directory.h"
 #include "stencils/godouken_stencil_index.h"
+#include "stencils/godouken_stencil_reference.h"
 #include "stencils/godouken_stencil_style.h"
 
 Vector<String> extract_breadcrumbs(const String &p_directory_path) {
@@ -305,9 +306,9 @@ void GodoukenDataModel::data() {
 	
 	nlohmann::json sidebar_json = nlohmann::json::object();
 	sidebar_json["data"]["scripts"] = nlohmann::json::array();
+	sidebar_json["data"]["reference"] = ProjectSettings::get_singleton()->get_setting("godouken/config/include_reference").operator bool();
 	for (Map<String, GodoukenDataEntry*>::Element *E = godouken_model.front(); E; E = E->next()) {
 		inja::Environment env;
-
 		GodoukenDataEntry *script_entry = E->value();
 		script_entry->data_json["data"]["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().capitalize().utf8();
 		script_entry->data_json["data"]["script"]["breadcrumbs"] = nlohmann::json::array();
@@ -340,6 +341,25 @@ void GodoukenDataModel::data() {
 		memdelete(file);
 	}
 
+	bool use_reference = ProjectSettings::get_singleton()->get_setting("godouken/config/include_reference").operator bool();
+	if (use_reference) {
+		inja::Environment env_ref;
+		nlohmann::json ref_json = nlohmann::json::object();
+		ref_json["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().capitalize().utf8();
+		const std::string result_ref = env_ref.render(godouken_stencil_reference, ref_json);
+		const String &dir_html_ref = "res://docs/html/";
+		dir->change_dir(dir_html_ref);
+		if (!dir->dir_exists(dir_html_ref)) {
+			dir->make_dir_recursive(dir_html_ref);
+		}
+
+		FileAccess *file_ref = FileAccess::create(FileAccess::AccessType::ACCESS_RESOURCES);
+		file_ref->reopen(dir_html_ref + "reference.html", FileAccess::WRITE);
+		file_ref->store_string(result_ref.c_str());
+		file_ref->close();
+		memdelete(file_ref);
+	}
+	
 	inja::Environment env_style;
 	const std::string style = env_style.render(godouken_stencil_style, nullptr);
 	const String &dir_css = "res://docs/css/";

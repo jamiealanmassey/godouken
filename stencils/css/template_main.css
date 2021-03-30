@@ -133,3 +133,5 @@ a:visited {
 	-webkit-font-smoothing: antialiased;
   	-moz-osx-font-smoothing: grayscale;
 }
+
+.spacing-1 { letter-spacing: 5px; }
