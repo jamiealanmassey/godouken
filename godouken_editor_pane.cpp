@@ -38,10 +38,6 @@ void GodoukenEditorPane::_on_pressed_clean() {
 	log_insert("-- Clean Documentation Pressed --");
 }
 
-void GodoukenEditorPane::_on_pressed_settings() {
-	log_insert("-- Settings Pressed --");
-}
-
 void GodoukenEditorPane::_bind_methods() {
 #ifdef GODOUKEN_TEST
 	ClassDB::bind_method(D_METHOD("_on_pressed_test"), &GodoukenEditorPane::_on_pressed_test);
@@ -49,7 +45,6 @@ void GodoukenEditorPane::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("_on_pressed_generate"), &GodoukenEditorPane::_on_pressed_generate);
 	ClassDB::bind_method(D_METHOD("_on_pressed_clean"), &GodoukenEditorPane::_on_pressed_clean);
-	ClassDB::bind_method(D_METHOD("_on_pressed_settings"), &GodoukenEditorPane::_on_pressed_settings);
 }
 
 void GodoukenEditorPane::setup_elements() {
@@ -82,10 +77,6 @@ void GodoukenEditorPane::setup_elements() {
 	pane_button_clean = memnew(Button);
 	pane_button_clean->set_text(TTR("Clean Documentation"));
 	pane_button_clean->connect("pressed", singleton, "_on_pressed_clean");
-
-	pane_button_settings = memnew(Button);
-	pane_button_settings->set_text(TTR("Settings"));
-	pane_button_settings->connect("pressed", singleton, "_on_pressed_settings");
 	
 	vb->add_child(pane_log);
 	hb->add_child(pane_title);
@@ -96,7 +87,6 @@ void GodoukenEditorPane::setup_elements() {
 
 	hb->add_child(pane_button_generate);
 	hb->add_child(pane_button_clean);
-	hb->add_child(pane_button_settings);
 	
 	log_insert(TTR("Godouken Documentation Engine : Started successfully"));
 	log_insert(TTR(" -- "));
@@ -134,7 +124,6 @@ GodoukenEditorPane::GodoukenEditorPane() {
 	pane_log = nullptr;
 	pane_button_generate = nullptr;
 	pane_button_clean = nullptr;
-	pane_button_settings = nullptr;
 	
 #ifdef GODOUKEN_TEST
 	pane_button_test = nullptr;

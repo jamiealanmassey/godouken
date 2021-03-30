@@ -22,7 +22,6 @@ private:
 
 	Button *pane_button_generate;
 	Button *pane_button_clean;
-	Button *pane_button_settings;
 	
 #ifdef GODOUKEN_TEST
 	Button *pane_button_test;
@@ -37,7 +36,6 @@ private:
 	
 	void _on_pressed_generate();
 	void _on_pressed_clean();
-	void _on_pressed_settings();
 
 protected:
 	static void _bind_methods();

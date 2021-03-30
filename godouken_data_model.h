@@ -54,6 +54,7 @@ class GodoukenDataModel : public Object {
     GDCLASS(GodoukenDataModel, Object);
 
 protected:
+	bool model_compiling;
     uint32_t model_script_hash;
     GodoukenDataNodeBase *model_node_root;
 

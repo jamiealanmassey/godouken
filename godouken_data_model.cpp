@@ -11,6 +11,7 @@
 
 #include <cwctype>
 
+#include "godouken_editor_pane.h"
 #include "godouken_script_translator.h"
 #include "modules/regex/regex.h"
 
@@ -61,6 +62,12 @@ bool contains(const PoolStringArray &p_array, const String &p_element) {
 }
 
 void GodoukenDataModel::data() {
+	if (model_compiling) {
+		return;
+	}
+
+	uint64_t time_start = OS::get_singleton()->get_system_time_msecs();
+	model_compiling = true;
 	Vector<String> directories;
 	Vector<GodoukenDataEntry *> directories_scripts;
 	//ModelTreeIndexer directory_tree;
@@ -71,6 +78,8 @@ void GodoukenDataModel::data() {
 	root_dir->dir_name = ".";
 
 	// COLLATE DIRECTORIES, FILES AND DIRECTORY TREE
+	GodoukenEditorPane::get_singleton()->log_flush();
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Indexing directories");
 	directories.push_back("res://");
 	DirAccess *dir = DirAccess::create(DirAccess::AccessType::ACCESS_RESOURCES);
 	while (!directories.empty()) {
@@ -91,6 +100,8 @@ void GodoukenDataModel::data() {
 		}
 	}
 
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Indexing directories ... done");
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Indexing files");
 	directories.push_back("res://");
 	while (!directories.empty()) {
 		dir->change_dir(directories[0]);
@@ -122,6 +133,8 @@ void GodoukenDataModel::data() {
 	}
 
 	// CREATE DIRECTORY LISTINGS
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Indexing files ... done");
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating directory listings");
 	Vector<nlohmann::json> directories_json;
 	Vector<GodoukenDirEntry *> dir_evaluation;
 	Map<String, nlohmann::json> dir_alpha_global;
@@ -180,7 +193,9 @@ void GodoukenDataModel::data() {
 		directories_json.push_back(directory_json);
 		dir_evaluation.remove(0);
 	}
-	
+
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating directory listings ... done");
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Project Index Page");
 	nlohmann::json index_json = nlohmann::json::object();
 	index_json["entries"]["abc"] = nlohmann::json::array();
 	index_json["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().capitalize().utf8();
@@ -191,6 +206,8 @@ void GodoukenDataModel::data() {
 		index_json["entries"]["abc"].push_back(entry_json);
 	}
 
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Project Index Page ... collated");
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Project Index Page ... exporting");
 	inja::Environment env_index;
 	const std::string result = env_index.render(godouken_stencil_index, index_json);
 	const String &dir_index = "res://docs/html/";
@@ -204,11 +221,15 @@ void GodoukenDataModel::data() {
 	file->store_string(result.c_str());
 	file->close();
 	memdelete(file);
-	
+
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Project Index Page ... done");
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Directory Pages");
 	for (uint32_t i = 0; i < directories_json.size(); i++) {
 		inja::Environment env;
-		const std::string result = env.render(godouken_stencil_directory, directories_json[i]);
 		const std::string name = directories_json[i]["url"].get<std::string>();
+		const String &name_str = name.c_str();
+		GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Directory Pages :: " + name_str);
+		const std::string result = env.render(godouken_stencil_directory, directories_json[i]);
 		const String &dir_html_dir = "res://docs/html/dirs";
 		dir->change_dir(dir_html_dir);
 		if (!dir->dir_exists(dir_html_dir)) {
@@ -220,13 +241,17 @@ void GodoukenDataModel::data() {
 		file->store_string(result.c_str());
 		file->close();
 		memdelete(file);
+		GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Directory Pages !" + name_str + " ... done");
 	}
 
 	// EVALUATE GD SCRIPT FILES AND EXTRACT JSON
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Directory Pages ... done");
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Evaluating Scripts");
 	Map<StringName, GodoukenGraphEntry *> model_graph;
 	for (uint32_t i = 0; i < directories_scripts.size(); i++) {
 		GodoukenTranslator *godouken_translator = memnew(GodoukenTranslator);
 		GodoukenDataEntry *directory_script = directories_scripts[i];
+		GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Evaluating Scripts !" + directory_script->data_name);
 		godouken_model.insert(directory_script->data_name, directory_script);
 		godouken_translator->evaluate(directory_script->data_json, directory_script->data_file, directory_script->data_directory);
 		directory_script->data_json["data"]["script"]["name_html"] = directory_script->data_name.utf8();
@@ -254,11 +279,15 @@ void GodoukenDataModel::data() {
 		}
 		
 		memdelete(godouken_translator);
+		GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Evaluating Scripts !" + directory_script->data_name + " ... done");
 	}
 	
 	// Create inheritance tree
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Evaluating Scripts ... done");
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Inheritance Trees");
 	for (uint32_t i = 0; i < directories_scripts.size(); i++) {
 		GodoukenDataEntry *directory_script = directories_scripts[i];
+		GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Inheritance Trees !" + directory_script->data_name);
 		const String &script_name_dt = directory_script->data_json["data"]["script"]["name_clean"].get<std::string>().c_str();
 		const GodoukenGraphEntry *entry_current = model_graph[script_name_dt];
 		const GodoukenGraphEntry *entry_superclass = model_graph[entry_current->graph_superclass];
@@ -302,8 +331,11 @@ void GodoukenDataModel::data() {
 		script_graph_str.append("\n\tclassDef styleC fill:#FF9933,stroke:#111,stroke-width:3px,font-size:0.96em,color:#FFF;");
 		script_graph_str.append("\n\tclassDef styleN fill:#FFFFFF,stroke:#111,stroke-width:3px,font-size:0.96em;\n");
 		directory_script->data_json["data"]["script"]["diagram"] = script_graph_str.as_string().utf8();
+		GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Inheritance Trees !" + directory_script->data_name + " ... done");
 	}
-	
+
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Inheritance Trees ... done");
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Sidebar");
 	nlohmann::json sidebar_json = nlohmann::json::object();
 	sidebar_json["data"]["scripts"] = nlohmann::json::array();
 	sidebar_json["data"]["reference"] = ProjectSettings::get_singleton()->get_setting("godouken/config/include_reference").operator bool();
@@ -341,10 +373,12 @@ void GodoukenDataModel::data() {
 		memdelete(file);
 	}
 
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Generating Sidebar ... done");
 	bool use_reference = ProjectSettings::get_singleton()->get_setting("godouken/config/include_reference").operator bool();
 	if (use_reference) {
 		inja::Environment env_ref;
 		nlohmann::json ref_json = nlohmann::json::object();
+		GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Exporting Reference Manual");
 		ref_json["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().capitalize().utf8();
 		const std::string result_ref = env_ref.render(godouken_stencil_reference, ref_json);
 		const String &dir_html_ref = "res://docs/html/";
@@ -358,8 +392,10 @@ void GodoukenDataModel::data() {
 		file_ref->store_string(result_ref.c_str());
 		file_ref->close();
 		memdelete(file_ref);
+		GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Exporting Reference Manual ... done");
 	}
-	
+
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Exporting Styles");
 	inja::Environment env_style;
 	const std::string style = env_style.render(godouken_stencil_style, nullptr);
 	const String &dir_css = "res://docs/css/";
@@ -373,7 +409,9 @@ void GodoukenDataModel::data() {
 	file_css->store_string(style.c_str());
 	file_css->close();
 	memdelete(file_css);
-	
+
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Exporting Styles ... done");
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Exporting Sidebar");
 	inja::Environment env_sidebar;
 	const std::string sidebar = env_sidebar.render(godouken_stencil_class_sidebar, sidebar_json);
 	const String &dir_generic = "res://docs/html/generic/";
@@ -389,6 +427,21 @@ void GodoukenDataModel::data() {
 	memdelete(file_sidebar);
 	
 	memdelete(dir);
+
+	uint64_t time_end = OS::get_singleton()->get_system_time_msecs();
+	uint64_t time_elapsed = time_end - time_start;
+	float time_secs = static_cast<float>(time_elapsed) / 1000.0f;
+	std::string time_cstr = std::to_string(time_secs);
+	StringBuilder time_str;
+	time_str.append("Compilation took ");
+	time_str.append(time_cstr.c_str());
+	time_str.append("s");
+	
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Exporting Sidebar ... done");
+	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - SUCCESSFUL | " + time_str.as_string());
+	GodoukenEditorPane::get_singleton()->log_insert("--");
+	GodoukenEditorPane::get_singleton()->log_insert("");
+	model_compiling = false;
 }
 
 void GodoukenDataModel::tree_indexer(GodoukenDirEntry *p_node, Vector<String> p_breadcrumbs) {
@@ -519,5 +572,9 @@ void GodoukenDataModel::tree_breadcrumb_json(const GodoukenDirEntry *p_node, nlo
 	}
 }
 
-GodoukenDataModel::GodoukenDataModel() {}
+GodoukenDataModel::GodoukenDataModel() :
+	model_compiling(false) {
+	
+}
+
 GodoukenDataModel::~GodoukenDataModel() {}

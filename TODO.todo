@@ -20,14 +20,14 @@ Phase #1:
         ☐ Modify comment parsing to span multiple lines
 Phase #2:
     HTML Template:
-        ☐ Add return to top of page button to every page in bottom right
+        ☐ Add return to top of page button to every page in bottom right 
         ✔ Add reference manual page for the tool @done(21-03-30 10:41)
-        ☐ Add ability to 'See Also' on Script + Functions inside of them
+        ☐ Add ability to 'See Also' on Script + Functions inside of them 
         ✔ Fix bug where version shows up in scripts where it isn't set @done(21-03-22 01:36)
     C++ Backend:
         ✔ Add ability to filter out certain directories @done(21-03-30 07:29)
         ☐ Add project JSON data into single JSON object injected into other objects
-        ☐ Add output of generation progress to Panel
+        ✔ Add output of generation progress to Panel @done(21-03-30 11:54)
         ☐ Add warnings/suggestions in output of Godouken to @ directives 
         ✔ Add option in settings to turn reference manual on/off when generating @done(21-03-30 11:07)
         ✔ Add settings to the Godot settings menu for Godouken @done(21-03-30 07:28)
