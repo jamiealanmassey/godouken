@@ -1,7 +1,5 @@
 /* godouken_data_model.h */
 
-#include "godouken_data_types.h"
-
 #include "core/ustring.h"
 #include "core/object.h"
 #include "core/map.h"

@@ -3,8 +3,6 @@
 #ifndef GODOUKEN_SCRIPT_TRANSLATOR_H
 #define GODOUKEN_SCRIPT_TRANSLATOR_H
 
-#include "godouken_data_types.h"
-
 #include "core/script_language.h"
 #include "core/object.h"
 #include "core/map.h"
