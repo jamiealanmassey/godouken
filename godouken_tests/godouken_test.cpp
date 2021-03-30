@@ -57,7 +57,7 @@ GodoukenTest *GodoukenTest::singleton = nullptr;
 
 TEST(TRANSLATOR_TESTS, TEST_EVALUATION_METADATA) {
 	nlohmann::json script_result;
-	GodoukenTest::get_singleton()->script_translator->evaluate(script_result, "property_test_script1.gd", "res://godouken/test/scripts/");
+	GodoukenTest::get_singleton()->script_translator->evaluate(script_result, "property_test_script1.gd", "res://docs/testing/scripts/");
 
 	ASSERT_TRUE(script_result.contains("data"));
 	ASSERT_TRUE(script_result["data"].contains("script"));
@@ -86,7 +86,7 @@ TEST(TRANSLATOR_TESTS, TEST_EVALUATION_METADATA) {
 
 TEST(TRANSLATOR_TESTS, TEST_EVALUATION_PROPERTIES) {
 	nlohmann::json script_result;
-	GodoukenTest::get_singleton()->script_translator->evaluate(script_result, "property_test_script1.gd", "res://godouken/test/scripts/");
+	GodoukenTest::get_singleton()->script_translator->evaluate(script_result, "property_test_script1.gd", "res://docs/testing/scripts/");
 
 	ASSERT_TRUE(script_result.contains("data"));
 	ASSERT_TRUE(script_result["data"].contains("script"));
@@ -136,7 +136,7 @@ TEST(TRANSLATOR_TESTS, TEST_EVALUATION_PROPERTIES) {
 
 TEST(TRANSLATOR_TESTS, TEST_EVALUATION_METHODS) {
 	nlohmann::json script_result;
-	GodoukenTest::get_singleton()->script_translator->evaluate(script_result, "property_test_script1.gd", "res://godouken/test/scripts/");
+	GodoukenTest::get_singleton()->script_translator->evaluate(script_result, "property_test_script1.gd", "res://docs/testing/scripts/");
 
 	ASSERT_TRUE(script_result.contains("data"));
 	ASSERT_TRUE(script_result["data"].contains("script"));
@@ -186,7 +186,7 @@ TEST(TRANSLATOR_TESTS, TEST_EVALUATION_METHODS) {
 
 TEST(TRANSLATOR_TESTS, TEST_EVALUATION_SIGNALS) {
 	nlohmann::json script_result;
-	GodoukenTest::get_singleton()->script_translator->evaluate(script_result, "property_test_script1.gd", "res://godouken/test/scripts/");
+	GodoukenTest::get_singleton()->script_translator->evaluate(script_result, "property_test_script1.gd", "res://docs/testing/scripts/");
 
 	/*ASSERT_TRUE(script_result.contains("script"));
 	ASSERT_TRUE(script_result["script"].contains("signals"));
@@ -200,7 +200,7 @@ void GodoukenTest::_bind_methods() {
 }
 
 int32_t GodoukenTest::execute_tests() {
-	const String &dir_test_scripts = "res://godouken/test/scripts/";
+	const String &dir_test_scripts = "res://docs/testing/scripts/";
 	DirAccess *dir = DirAccess::create(DirAccess::AccessType::ACCESS_RESOURCES);
 	if (!dir->dir_exists(dir_test_scripts)) {
 		dir->make_dir_recursive(dir_test_scripts);

@@ -4,6 +4,7 @@
 
 #include "core/class_db.h"
 #include "core/engine.h"
+#include "core/project_settings.h"
 #include "editor/editor_node.h"
 
 #include "godouken.h"
@@ -34,12 +35,30 @@ void register_godouken_types() {
 	ClassDB::register_class<GodoukenTest>();
 #endif // GODOUKEN_TEST
 
-	#ifdef TOOLS_ENABLED
+#ifdef TOOLS_ENABLED
 	ClassDB::set_current_api(ClassDB::API_EDITOR);
 	ClassDB::register_class<GodoukenEditorPane>();
 	ClassDB::set_current_api(ClassDB::API_CORE);
 	EditorNode::add_plugin_init_callback(_initiialise_editor_pane);
-	#endif
+#endif
+
+	if (!ProjectSettings::get_singleton()->has_setting("godouken/config/website")) {
+		ProjectSettings::get_singleton()->set_setting("godouken/config/website", "");
+	}
+
+	if (!ProjectSettings::get_singleton()->has_setting("godouken/config/include_reference")) {
+		ProjectSettings::get_singleton()->set_setting("godouken/config/include_reference", true);
+	}
+
+	if (!ProjectSettings::get_singleton()->has_setting("godouken/config/include_console_suggestions")) {
+		ProjectSettings::get_singleton()->set_setting("godouken/config/include_console_suggestions", true);
+	}
+
+	if (!ProjectSettings::get_singleton()->has_setting("godouken/config/exclude_directories")) {
+		PoolStringArray exclude;
+		exclude.push_back("res://addons");
+		ProjectSettings::get_singleton()->set_setting("godouken/config/exclude_directories", exclude);
+	}
 }
 
 void unregister_godouken_types() {

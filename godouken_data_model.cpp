@@ -47,12 +47,25 @@ void extract_breadcrumbs(const String &p_directory_path, nlohmann::json &p_bread
 	}
 }
 
+bool contains(const PoolStringArray &p_array, const String &p_element) {
+	bool found = false;
+	for (int32_t i = 0; i < p_array.size(); i++) {
+		if (p_array[i].find(p_element) >= 0) {
+			found = true;
+			break;
+		}
+	}
+
+	return found;
+}
+
 void GodoukenDataModel::data() {
 	Vector<String> directories;
 	Vector<GodoukenDataEntry *> directories_scripts;
 	//ModelTreeIndexer directory_tree;
 	nlohmann::json directory_json = nlohmann::json::object();
 
+	PoolStringArray excluded = ProjectSettings::get_singleton()->get_setting("godouken/config/exclude_directories").operator PoolVector<String>();
 	GodoukenDirEntry *root_dir = new GodoukenDirEntry();
 	root_dir->dir_name = ".";
 
@@ -68,8 +81,8 @@ void GodoukenDataModel::data() {
 		while (!(dir_filename = dir->get_next()).empty()) {
 			if (dir_filename[0] != '.') {
 				const String &str_dir = dir->get_current_dir_without_drive();
-				const String &str_path = str_dir + "/" + dir_filename;
-				if (dir->current_is_dir()) {
+				const String &str_path = (str_dir + "/" + dir_filename).replace("///", "//");
+				if (dir->current_is_dir() && !contains(excluded, str_path)) {
 					directories.push_back(str_path);
 					tree_indexer(root_dir, extract_breadcrumbs(str_path));
 				}
@@ -87,18 +100,20 @@ void GodoukenDataModel::data() {
 		while (!(dir_filename = dir->get_next()).empty()) {
 			if (dir_filename[0] != '.') {
 				const String &str_dir = dir->get_current_dir_without_drive();
-				const String &str_path = str_dir + "/" + dir_filename;
-				if (dir->current_is_dir()) {
-					directories.push_back(str_path);
-				}
-				else {
-					if (dir_filename.find(".gd") >= 0) {
-						GodoukenDataEntry *directory_script = new GodoukenDataEntry();
-						directory_script->data_directory = dir->get_current_dir_without_drive() + "/";
-						directory_script->data_file = dir_filename;
-						directory_script->data_name = dir_filename.substr(0, dir_filename.find_char('.'));
-						directories_scripts.push_back(directory_script);
-						tree_indexer(root_dir, extract_breadcrumbs(str_dir), directory_script);
+				const String &str_path = (str_dir + "/" + dir_filename).replace("///", "//");
+				if (!contains(excluded, str_path)) {
+					if (dir->current_is_dir()) {
+						directories.push_back(str_path);
+					}
+					else {
+						if (dir_filename.find(".gd") >= 0) {
+							GodoukenDataEntry *directory_script = new GodoukenDataEntry();
+							directory_script->data_directory = dir->get_current_dir_without_drive() + "/";
+							directory_script->data_file = dir_filename;
+							directory_script->data_name = dir_filename.substr(0, dir_filename.find_char('.'));
+							directories_scripts.push_back(directory_script);
+							tree_indexer(root_dir, extract_breadcrumbs(str_dir), directory_script);
+						}
 					}
 				}
 			}
@@ -164,7 +179,7 @@ void GodoukenDataModel::data() {
 		directories_json.push_back(directory_json);
 		dir_evaluation.remove(0);
 	}
-
+	
 	nlohmann::json index_json = nlohmann::json::object();
 	index_json["entries"]["abc"] = nlohmann::json::array();
 	index_json["project"]["title"] = ProjectSettings::get_singleton()->get_setting("application/config/name").operator String().capitalize().utf8();
