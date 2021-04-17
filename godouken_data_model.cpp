@@ -1,7 +1,6 @@
 /* godouken_data_model.cpp */
 
 #include "editor/editor_node.h"
-#include "editor/editor_scale.h"
 #include "core/os/file_access.h"
 #include "core/class_db.h"
 
@@ -129,6 +128,7 @@ void GodoukenDataModel::evaluate_files(GodoukenDirEntry *p_root_dir, const PoolS
 		}
 	}
 
+	memdelete(dir);
 	GodoukenEditorPane::get_singleton()->log_insert("[Compiling] - Indexing files ... done");
 }
 

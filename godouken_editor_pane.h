@@ -2,7 +2,6 @@
 
 #ifndef GODOUKEN_EDITOR_PANE_H
 #define GODOUKEN_EDITOR_PANE_H
-#ifdef TOOLS_ENABLED
 
 #include "core/object.h"
 #include "scene/gui/button.h"
@@ -56,5 +55,4 @@ public:
 	~GodoukenEditorPane();
 };
 
-#endif // TOOLS_ENABLED
 #endif // GODOUKEN_EDITOR_PANE_H

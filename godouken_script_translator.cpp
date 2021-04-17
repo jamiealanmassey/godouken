@@ -435,6 +435,8 @@ void GodoukenTranslator::evaluate(nlohmann::json &p_script_json, const String &p
 		script_line_begin = get_script_line_begin(script_lines);
 		evaluate_script(p_script_json, members_to_keys);
 	}
+
+	memdelete(script);
 }
 
 void GodoukenTranslator::evaluate(nlohmann::json &p_script_json, const String& p_script_name, const String& p_script_directory) {
@@ -442,6 +444,8 @@ void GodoukenTranslator::evaluate(nlohmann::json &p_script_json, const String& p
 	FileAccess *script_file = FileAccess::open(p_script_directory + p_script_name, FileAccess::READ, &script_status);
 	if (script_status == Error::OK) {
 		evaluate(p_script_json, script_file->get_as_utf8_string());
+		script_file->close();
+		memdelete(script_file);
 	}
 }
 
